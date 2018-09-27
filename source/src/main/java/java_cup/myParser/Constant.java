@@ -12,13 +12,12 @@ public class Constant {
 	public static final String watermark	= "./watermark.jpg"; 
 */
 	
-	public static final String dbConfigFile = "/home/bozhi/Downloads/xmlParser/db_connect.json";
-	public static final String mapper 		= "/home/bozhi/Downloads/xmlParser/mapper.json";
+	public static final String dbConfigFile = "/home/bozhi/Downloads/xmlParser/xmlParser/utils/db_connect.json";
+	public static final String mapper 		= "/home/bozhi/Downloads/xmlParser/xmlParser/utils/mapper.json";
 	public static final String logger 		= "jar_";
 	public static final String logFolder    = "/home/bozhi/Desktop/Logs/";	
 	public static final String imagesFolder	= "/home/bozhi/Desktop/pictures/";
-	public static final String watermark	= "/home/bozhi/Downloads/xmlParser/watermark.jpg";	
-	
+	public static final String watermark	= "/home/bozhi/Downloads/xmlParser/xmlParser/utils/watermark.jpg";	
 	
 	//===== Image properties =====
 	public static final int image_full_width  = 1200;
