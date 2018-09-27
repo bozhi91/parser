@@ -1,0 +1,20 @@
+{
+	"CRM": [{
+		"name": "molista",
+		"root": "/Agencies/agency",
+		"Agency": [{
+			"name": "casinuevo",
+			"attributes": [{
+				"id": "iddddd",
+				"title": "title"
+			}]
+		},
+		{
+			"name": "homesya",
+			"attributes": [{
+				"id": "iddddd",
+				"title": "title"
+			}]
+		}]
+	}]
+}

@@ -1,0 +1,7 @@
+{
+"user": "user",
+"pass": "root",
+"dbserver": "localhost",
+"dbname": "homesya",
+"dbport": "3306"
+}
