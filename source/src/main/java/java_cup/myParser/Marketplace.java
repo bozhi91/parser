@@ -268,12 +268,12 @@ public class Marketplace {
 
 //-------TODO: Refactor-> Insert all the agencies at once. Build the query in the memory RAM and then insert everything at once. Just as the adverts.
   		if(agency_id!=0){ 
-    		System.out.println("\t === Parsing with id <"+agency_id+"> ===");
+    		System.out.println("\t === Parsing agency with id <"+agency_id+"> ===");
   		}
-	    for(int i=0; i<agencies.size();i++){
+	    for(int i=0; i<agencies.size();i++){	    
 	    	if(agency_id!=0){ 	    		
-				if(agencies.get(i).getId() == Integer.valueOf("9999"+crm_id+agency_id)){				
-					id_found = true;
+				if(agencies.get(i).getId()==Integer.valueOf("9999"+crm_id+agency_id)){				
+					id_found = true;					
 					new Thread(new  parseAdvertsBG(agencies.get(i).getXmlFeedsPath(), this.agency, agencies.get(i).getName(), crm_id, agencies.get(i).getId())).start();					
 				}				
 	    	}else{
@@ -402,7 +402,7 @@ public class Marketplace {
 			    	//=========== FOR DEBUGGING=================
 			    	//If we parse by advertId, and the id we're looking for is present in the xml we store this advert.
 				    if(advert_parse_id!=0 && advert_ext_id!=null){			    		
-				    	if(Integer.parseInt(advert_ext_id)==advert_parse_id){
+				    	if(Integer.parseInt(advert_ext_id)==advert_parse_id){				    		
 				    		insert=true;
 							id_found=true;				
 						}	
@@ -508,8 +508,7 @@ public class Marketplace {
         		
         		attrib = attrib.toLowerCase();        	        
         		System.out.println("\""+unmappedAttribs.get(i)+"\":\""+attrib+"\",");
-        	}
-        	
+        	}        	
         	unmappedAttribs.clear();
         	System.out.println();
         }        	
@@ -528,7 +527,8 @@ public class Marketplace {
         attributes.add("subcategory_id");
         attributes.add("category_id");
 	    /////////////////////////////////////////////////////////
-	    //Try to run this one in background      	   
+	    //Try to run this one in background    
+        
         if(insert || id_found){	
         	System.out.println(" Adverts to insert: ("+adverts.size()+") from the file: "+filename+"\n");
         	User u = new User(); 	    

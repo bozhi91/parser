@@ -89,7 +89,11 @@
 				"apartamento_cat":"356",
 				"apartamento_sub":"373",
 				"duplex_cat":"356",
-				"duplex_sub":"379"
+				"duplex_sub":"379",
+				"piso_cat":"",
+				"piso_sub":"",
+				"casa_cat":"",
+				"casa_sub":""
 			}	
 		},
 		{

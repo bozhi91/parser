@@ -62,6 +62,7 @@ public class User {
 			 if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("id")){		      			    	      	
 				tag_value = tag_value.replace("inmo_00", "");
 				this.user_ext_id = Integer.valueOf(tag_value);	
+				this.id = Integer.valueOf("9999"+this.crm_id+this.user_ext_id);				
 		    }
 			else if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("name")){
 	      		name = tag_value;
