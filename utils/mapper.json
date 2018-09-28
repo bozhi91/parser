@@ -97,6 +97,31 @@
 			}	
 		},
 		{
+			"site_name": "fotocasa",
+			"xml_guide_path":"http://app.molista.com/XML/fotocasa.xml",		
+			"xml_feeds":"",
+			"root": "agency",
+			"attributes":{
+				"id": "id",
+				"name": "name",
+				"country": "country",
+				"email": "email",
+				"phone": "phone",
+				"xml_path": "xml_path",
+				"web_page": "web_page"
+			},
+			"categories":{
+				"apartamento_cat":"356",
+				"apartamento_sub":"373",
+				"duplex_cat":"356",
+				"duplex_sub":"379",
+				"piso_cat":"",
+				"piso_sub":"",
+				"casa_cat":"",
+				"casa_sub":""
+			}	
+		},
+		{
 			"site_name": "molista_casinuevo",
 			"xml_guide_path": "http://app.molista.com/XML/casinuevo.xml",
 			"xml_feeds":"",	
@@ -133,6 +158,35 @@
 				"apartment_cat":"373",
 				"apartment_sub":"356"
 			}
+		},
+		{
+			"site_name": "trovit",
+			"xml_guide_path":"/home/bozhi/Desktop/agencias.xml",
+			"xml_feeds":"/home/bozhi/Desktop/feeds.xml",
+			"root": "agency",
+			"attributes": {
+				"IdAgencia": "id",
+				"Nombre": "name",
+				"DNI": "dni",
+				"Telefono":"phone",
+				"Email":"email",
+				"CodigoColegiado":"codigo_colegiado",
+				"Provincia":"provincia",
+				"Localidad":"localidad",
+				"TipoVia":"tipo_via",
+				"NombreVia":"nombre_via",
+				"NumeroVia":"numero_via",
+				"CodigoPostal":"cp",
+				"PersonaContacto":"persona_contacto",
+				"Fax":"Fax",
+				"PaginaWeb":"pagina_web"
+			},
+			"categories":{
+				"apartment_cat":"373",
+				"apartment_sub":"356",
+				"piso_cat":"",
+				"piso_sub":""
+			}
 		}
 	],
 	"Marketplaces": [{
@@ -146,8 +200,8 @@
 			"content": "description",
 			"price":"price",
 			"property_type":"category",
-			"city":"city",
-			"region":"region",
+			"city":"region",
+			"region":"city",
 			"postcode":"postcode",
 			"city_area":"city_area",
 			"floor_area":"floor_area",
@@ -164,6 +218,7 @@
 			"date":"date",
 			"parking":"parking",
 			"country":"country",
+			"time":"time",
 
 			"features/interior":"interior",
 			"features/berth":"berth",
@@ -220,8 +275,8 @@
 
 			"feature":"property_feature",
 			"type":"category",
-			"town":"property_town",
-			"province":"property_province",
+			"town":"region",
+			"province":"city",
 			"date":"date",
 			"image_url":"image_url",
 			"ref":"title",
@@ -337,17 +392,18 @@
 			"tip_inm":"tip_inm",
 			"subtipo":"category",
 			"tip_inm2":"tip_inm2",
-			"provincia":"provincia",
+			"provincia":"city",
 			"cod_prov":"cod_prov",
-			"localidad":"localidad",
+			"localidad":"region",
 			"cod_pob":"cod_pob",
-			"ubicacion":"ubicacion",
+			"ubicacion":"address",
 			"cp":"cp",
 			"cod_zona":"cod_zona",
 			"banos":"bathrooms",
 			"aseos":"aseos",
 			"habitaciones":"rooms",
-			"m2construidos":"m2construidos",
+			
+			"m2construidos":"floor_area",
 			"m2utiles":"m2utiles",
 			"m2terraza":"m2terraza",
 			"m2jardin":"m2jardin",

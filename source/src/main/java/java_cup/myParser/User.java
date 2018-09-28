@@ -31,7 +31,7 @@ public class User {
 	private String email="not available";
 	private String phone="not available";
 	private String webpage = "not available";
-	private String xml_feeds_path="not available";
+	private String xml_feeds_path="";
 	
 	private String provincia="not available",
 			localidad="not available",

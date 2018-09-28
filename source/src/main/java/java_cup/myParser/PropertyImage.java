@@ -88,11 +88,11 @@ class PropertyImage {
 		int pos = 0;		
 		String pendingImage = null;	
 		String aux_url = url;
-		String id;		
-
+		String id;
+		
 		//Split the arguments
-		String[] tokens  = url.split("-");
-		tokens  = url.split("-");
+		String[] tokens  = url.split("___");
+		tokens  = url.split("___");
 		this.order     = tokens[0];
 		this.user_id   = tokens[1]; 
 		this.advert_id = tokens[2];	
@@ -107,7 +107,7 @@ class PropertyImage {
 		if(url.contains(".molista")){ 
 			url.replace(".molista", "");			
 		}
-		
+
 		filename = url.substring(url.lastIndexOf('/') + 1);	//extract the filename only		
 		
 		//Get file extension

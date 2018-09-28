@@ -278,7 +278,7 @@ public class Marketplace {
 				}				
 	    	}else{
 	    		id_found = true;
-	    		// new Thread(new  parseAdvertsBG(agencies.get(i).getXmlFeedsPath(), this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId())).start();
+	    		 new Thread(new  parseAdvertsBG(agencies.get(i).getXmlFeedsPath(), this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId())).start();
 	    	}
 	    }
 //-------TODO: Refactor-> Insert all the agencies at once. Build the query in the memory RAM and then insert everything at once. Just as the adverts.
@@ -532,8 +532,10 @@ public class Marketplace {
         if(insert || id_found){	
         	System.out.println(" Adverts to insert: ("+adverts.size()+") from the file: "+filename+"\n");
         	User u = new User(); 	    
-     	    //writeAdvertsDB(attributes,adverts,attribMetaArray, u.getUserByName(crm_id, site_name));		    
-     	    System.out.println("=== Parsing finished for file: "+filename+", mapper: "+mapper+" ===");		    
+     	   
+        	writeAdvertsDB(attributes,adverts,attribMetaArray, u.getUserByName(crm_id, site_name));		    
+     	    
+        	System.out.println("=== Parsing finished for file: "+filename+", mapper: "+mapper+" ===");		    
      		log.writeLog("=== Parsing finished for file: "+filename+", mapper: "+mapper+" ===\n");     		
         }
         else  if(id_found==false || adverts.size()==0){	
@@ -576,6 +578,7 @@ public class Marketplace {
 		//Write the Adverts to the Database	
 //=======================================================================================================================================================
 		//Check if the advert is created. If it's not, create it.
+					
 			query    = "insert into parser_Adverts(id,user_id,ad_ext_id) values";
 			String queryaux = "insert into parser_AuxAdverts(advert_id) values";		
 			site_adverts = a.getAdvertsByUserId(user_id);		
@@ -585,7 +588,8 @@ public class Marketplace {
 			for(int i=0;i<total;i++){						
 				System.out.println(" Inserting "+(i+1)+" out of:"+adverts.size()+" adverts. \n");				
 		    	String adv_ext = site_adverts.get(adverts.get(i));
-		    	int adv_ext_id = Integer.valueOf(adverts.get(i));
+		    			    
+		    	long adv_ext_id = Long.valueOf(adverts.get(i)); //Integer.valueOf(adverts.get(i));
 		    	queryaux+="('"+user_id+adv_ext_id+"'),";
 		    	
 		    	//If the advert is not present in the database, insert it.
@@ -593,11 +597,12 @@ public class Marketplace {
 		    		counter++;		    		
 		    		query+= "('"+user_id+adv_ext_id+"','"+user_id+"','"+adv_ext_id+"'),";	
 		    		numAdverts++;
-		    	}  
+		    	} 
 		    	else{	
 		    		storedAdverts++;
 		    	}
 		    }
+	
 			//Insert the advert in the aux table: parser_AuxAdverts
 			if(queryaux.endsWith(",")){   
 				queryaux = queryaux.substring(0, queryaux.length() - 1) + ';';	
@@ -617,7 +622,7 @@ public class Marketplace {
 			
 			for(int i=0;i<attribMetaArray.size();i++){	
 				String advert_id = attribMetaArray.get(i).getAdvertId();			
-				advert_id=advert_id.replace("00", "");				
+				//advert_id=advert_id.replace("00", "");				
 				String int_id = site_adverts.get(advert_id);//get the external advert id				
 				attribMetaArray.get(i).setAdvertId(int_id);//replace it with the internal ID. The one stored in the database							
 			}	
@@ -671,19 +676,18 @@ public class Marketplace {
 		//get all adverts for the current Agency
 		active_adverts = a.getActiveAdverts(user_id);	
 		query   = "insert into parser_attributes_meta(attrib_id,advert_int_id, attrib_value) values";
-		counter = 0;		
-
-		for(int i=0;i<attribMetaArray.size();i++){
-			String key = attribMetaArray.get(i).getAttribId()+"__"+attribMetaArray.get(i).getAdvertId();					
+		counter = 0;				
 		
+		for(int i=0;i<attribMetaArray.size();i++){
+			String key = attribMetaArray.get(i).getAttribId()+"__"+attribMetaArray.get(i).getAdvertId();							
 			//Do this if the attribute is not stored in the attributes_meta table
-			if(active_adverts.get(key)==null){
+			if(active_adverts.get(key)==null){												
 				counter++;
 				String attribValue = attribMetaArray.get(i).getAttribValue();
 				attribValue = attribValue.replaceAll("'", "''");
 				attribValue = attribValue.replaceAll("\\'", "''");
 
-				if(attribMetaArray.get(i).getAdvertId()!=null){	
+				if(attribMetaArray.get(i).getAdvertId()!=null){						
 					query+="('"+
 							attribMetaArray.get(i).getAttribId()+"','"+
 							attribMetaArray.get(i).getAdvertId()+"','"+
@@ -697,7 +701,8 @@ public class Marketplace {
 					//if the attribute is not an image or feature, then update it.	
 					if( !attribMetaArray.get(i).getAttribName().equals("url_image") && 
 						!attribMetaArray.get(i).getAttribName().equals("property_feature") &&
-						!attribMetaArray.get(i).getAttribName().equals("feature_value")
+						!attribMetaArray.get(i).getAttribName().equals("feature_value") &&
+						!attribMetaArray.get(i).getAttribName().equals("photo_numimagen")						
 					){
 						String[] parts   = key.split("__");
 						String attrib_id = parts[0]; 
@@ -708,6 +713,7 @@ public class Marketplace {
 				}
 			}
 		}  
+		
 		//Do the insert of the advet meta attributes
 		if(counter>0){	
 			if(query.endsWith(",")){   
@@ -732,13 +738,13 @@ public class Marketplace {
 			hashAdvert = adv.getAdvertTitle(user_id);
 
 			for(int i=0;i<web_site_adverts.size();i++){	
-				String[] tokens  = web_site_adverts.get(i).split("-");				
+				String[] tokens  = web_site_adverts.get(i).split("___");				
 				try{	
 					String adv_title = "";
 					adv_title = hashAdvert.get(tokens[2]);
 					if(adv_title==null)adv_title = "untitled";
 					
-					image = p.downloadImage(web_site_adverts.get(i)+"-"+adv_title+"-"+web_site_adverts.size()+"-"+(i+1));	
+					image = p.downloadImage(web_site_adverts.get(i)+"___"+adv_title+"___"+web_site_adverts.size()+"___"+(i+1));	
 					
 					if(image.contains("_pending")) {
 						tokens  = image.split("_");

@@ -89,7 +89,7 @@ public class Advert {
 		ArrayList<Map<String,String>> hashAdvertArray = new ArrayList<Map<String,String>>();
 		  
 		while(rs.next()){
-			hashAdvert.put(String.valueOf(rs.getInt(3)), String.valueOf(rs.getLong(1)));
+			hashAdvert.put(String.valueOf(rs.getLong(3)), rs.getString(1));
 		}		
 		return hashAdvert;
 	}
@@ -119,7 +119,7 @@ public class Advert {
 				
 				title = title.toLowerCase();
 				title = title.replace(" ", "_");
-				hashAdvert.put(String.valueOf(rs.getLong(1)),title);
+				hashAdvert.put(rs.getString(1),title);
 			}
 			return hashAdvert;
 		}
@@ -146,7 +146,7 @@ public class Advert {
 					prev=current;
 					counter=0;
 				}				
-				adverts.add(String.valueOf(counter+"-"+rs.getLong(1))+"-"+String.valueOf(rs.getLong(2))+"-"+rs.getString(3)+"-"+rs.getInt(4));				
+				adverts.add(String.valueOf(counter+"___"+rs.getString(1))+"___"+String.valueOf(rs.getLong(2))+"___"+rs.getString(3)+"___"+rs.getInt(4));				
 			}
 			return adverts;
 		}
@@ -182,7 +182,7 @@ public class Advert {
 		Map<String,String>  hashAdvert = new HashMap <String, String>();
 		
 		while(rs.next()){		
-			hashAdvert.put( String.valueOf(rs.getLong(1))+"__"+String.valueOf(rs.getLong(2)),rs.getString(3) );
+			hashAdvert.put(rs.getString(1)+"__"+rs.getString(2),rs.getString(3) );
 		}
 		return hashAdvert;
 	}
@@ -203,7 +203,7 @@ public class Advert {
 	  
 	 public static void uploadImage(String id, int status){						
 			DataBase db  = DataBase.getInstance();
-			String query = "update parser_attributes_meta set img_uploaded='"+status+"' where id="+id;		
+			String query = "update parser_attributes_meta set img_uploaded='"+status+"' where id="+id;	
 			db.executeUpdate(query);		
 		}
 	 
@@ -213,9 +213,13 @@ public class Advert {
 			ResultSet rs = db.executeSelect(query);
 			
 			try {
-				if(rs.next()){
-					return rs.getInt(6);
+				if(rs!=null) {
+					while(rs.next()){		
+						return rs.getInt(6);
+					
 				}
+				}
+				
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}		
