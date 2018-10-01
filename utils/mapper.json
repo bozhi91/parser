@@ -2,7 +2,7 @@
 	"CRMs": [
 	{
 			"site_name": "ghestia",
-			"xml_guide_path":"/home/bozhi/Downloads/CRMs/ghestia/agencias.xml",
+			"xml_agencies":"/home/bozhi/Downloads/CRMs/ghestia/agencias.xml",
 			"xml_feeds":"/home/bozhi/Downloads/CRMs/ghestia/feeds.xml",
 			"root": "Agencia",
 			"attributes":{
@@ -53,7 +53,7 @@
 		},
 		{
 			"site_name": "molista_homesya",
-			"xml_guide_path":"https://s3-eu-west-1.amazonaws.com/homesya/xmls/homesya.xml",		
+			"xml_agencies":"https://s3-eu-west-1.amazonaws.com/homesya/xmls/homesya.xml",		
 			"xml_feeds":"",
 			"root": "agency",
 			"attributes":{
@@ -73,7 +73,7 @@
 		},
 		{
 			"site_name": "habitaclia",
-			"xml_guide_path":"http://app.molista.com/XML/habitaclia.xml",		
+			"xml_agencies":"http://app.molista.com/XML/habitaclia.xml",		
 			"xml_feeds":"",
 			"root": "agency",
 			"attributes":{
@@ -98,7 +98,7 @@
 		},
 		{
 			"site_name": "fotocasa",
-			"xml_guide_path":"http://app.molista.com/XML/fotocasa.xml",		
+			"xml_agencies":"http://app.molista.com/XML/fotocasa.xml",		
 			"xml_feeds":"",
 			"root": "agency",
 			"attributes":{
@@ -123,7 +123,7 @@
 		},
 		{
 			"site_name": "molista_casinuevo",
-			"xml_guide_path": "http://app.molista.com/XML/casinuevo.xml",
+			"xml_agencies": "http://app.molista.com/XML/casinuevo.xml",
 			"xml_feeds":"",	
 			"root": "agency",
 			"attributes": {
@@ -142,7 +142,7 @@
 		},
 		{
 			"site_name": "molista_kyero",
-			"xml_guide_path": "http://app.molista.com/XML/kyero.xml",
+			"xml_agencies": "http://app.molista.com/XML/kyero.xml",
 			"xml_feeds":"",	
 			"root": "agency",
 			"attributes": {
@@ -161,31 +161,54 @@
 		},
 		{
 			"site_name": "trovit",
-			"xml_guide_path":"/home/bozhi/Desktop/agencias.xml",
-			"xml_feeds":"/home/bozhi/Desktop/feeds.xml",
+			"xml_agencies":"http://app.molista.com/XML/trovit.xml",
+			"xml_feeds":"",
 			"root": "agency",
 			"attributes": {
-				"IdAgencia": "id",
-				"Nombre": "name",
-				"DNI": "dni",
-				"Telefono":"phone",
-				"Email":"email",
-				"CodigoColegiado":"codigo_colegiado",
-				"Provincia":"provincia",
-				"Localidad":"localidad",
-				"TipoVia":"tipo_via",
-				"NombreVia":"nombre_via",
-				"NumeroVia":"numero_via",
-				"CodigoPostal":"cp",
-				"PersonaContacto":"persona_contacto",
-				"Fax":"Fax",
-				"PaginaWeb":"pagina_web"
+				"id": "id",
+				"name": "name",
+				"country": "country",
+				"email": "email",
+				"phone": "phone",
+				"xml_path": "xml_path",
+				"web_page": "web_page"
 			},
 			"categories":{
 				"apartment_cat":"373",
 				"apartment_sub":"356",
 				"piso_cat":"",
-				"piso_sub":""
+				"piso_sub":"",
+
+				"apartamento_cat":"",
+				"apartamento_sub":"",
+				"duplex_cat":"",
+				"duplex_sub":"",
+				"naveindustrial_cat":"",
+				"naveindustrial_sub":"",
+				"atico_cat":"",
+				"atico_sub":""
+			}
+		},
+		{
+			"site_name": "1001_agencias",
+			"xml_agencies": "/home/bozhi/Desktop/1001_agencias_agencias.xml",
+			"xml_feeds":"/home/bozhi/Desktop/1001_agencias_feeds.xml",	
+			"root": "agency",
+			"attributes": {
+				"agency_cod": "id",
+				"agency_name": "name",
+				"country": "country",
+				"agency_mail": "email",
+				"agency_tel": "phone",
+				"agency_zip":"cp",
+				"agency_street":"nombre_via",
+				"agency_city":"provincia",
+				"agency_person_contact":"persona_contacto",
+				"agency_web": "web_page"
+			},
+			"categories":{
+				"apartment_cat":"373",
+				"apartment_sub":"356"
 			}
 		}
 	],
@@ -466,5 +489,62 @@
 			"producto_destacado":"producto_destacado",
 			"producto_oportunidad":"producto_oportunidad"
 		}
-	}]
+	},
+	{
+		"site_name": "1001_agencias",
+		"root": "ad",
+		"attributes": {						
+			
+			"id":"id",
+			"reference":"reference",
+			"title":"title",
+			"title_es":"title_es",
+			"type_agency":"type_agency",
+			"agency_cod":"agency_cod",
+			"sales_type":"sales_type",
+			"property_type":"property_type",
+			"property_category":"category",
+			"new_development":"new_development",
+			"zip":"zip",
+			"country":"country",
+			"province":"city",
+			"city":"region",
+			"location_detail":"location_detail",
+			"street":"street",
+			"show_street":"show_street",
+			"num_street":"num_street",
+			"num_floor":"num_floor",
+			"num_door":"num_door",
+			"show_num":"show_num",
+			"longitude":"longitude",
+			"latitude":"latitude",
+			"currency":"currency",
+			"price":"price",
+			"rental_deposit":"rental_deposit",
+			"frequency":"frequency",
+			"persons_capacity":"persons_capacity",
+			"build_year":"build_year",
+			"condition":"condition",
+			"building_height":"building_height",
+			"orientation":"orientation",
+			"energy":"energy",
+			"constructed_area":"constructed_area",
+			"usefull_area":"usefull_area",
+			"pet":"pet",
+			"date_ad":"date_ad",
+			"url_link":"url_link",
+			"url_video":"url_video",
+			"url_virtualtour":"url_virtualtour",
+			"lift":"lift",
+			"balcony":"balcony",
+			"gatekeeper":"gatekeeper",
+			"wheelchair_friendly":"wheelchair_friendly",
+			"description_es_short":"description_es_short",
+			"description_es":"description_es",
+			"description_en_short":"description_en_short",
+			"description_en":"description_en",
+			"picture/url":"url_image",
+			"picture/title":"image_title"
+		}
+	},]
 }

@@ -207,7 +207,7 @@ public class Marketplace {
 	
 	    //Check if the given XML file is accessible
 	    if(!status) {
-	    	System.out.println("#Error: The file <"+fileURL+"> is not accessible for the CRM <"+this.CRM+">");
+	    	System.out.println("#Error: The agencies file <"+fileURL+"> is not accessible for the CRM <"+this.CRM+">");
 	    	log.writeLog("#Error: The file <"+fileURL+"> is not accessible!!\n");
 	    	return false;
 	    }
@@ -278,7 +278,7 @@ public class Marketplace {
 				}				
 	    	}else{
 	    		id_found = true;
-	    		 new Thread(new  parseAdvertsBG(agencies.get(i).getXmlFeedsPath(), this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId())).start();
+	    		new Thread(new  parseAdvertsBG(agencies.get(i).getXmlFeedsPath(), this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId())).start();
 	    	}
 	    }
 //-------TODO: Refactor-> Insert all the agencies at once. Build the query in the memory RAM and then insert everything at once. Just as the adverts.
@@ -366,7 +366,10 @@ public class Marketplace {
 	
 	    String tag_name = "";	   
         ap.selectElement("*");    
-        while(ap.iterate()){
+        
+        boolean found = false;
+        
+        while(ap.iterate()/* && !found && vn.getText()==-1*/){
         	if(vn.getText()!=-1){
 		    	tag_name  = vn.toString(vn.getCurrentIndex());    
 		      	String tag_value = vn.toNormalizedString(vn.getText());
@@ -379,7 +382,11 @@ public class Marketplace {
 		    	if(site_mapper.get(tag_name)!=null && site_mapper.get(tag_name).equals("id")){
 		    		advert_ext_id = tag_value;//Get the advertId from the XML	
 		    		advert_ext_id = advert_ext_id.replaceAll("[^0-9.]", "");
-	
+		    		
+		    		if(advert_ext_id.startsWith("00")){
+		    			advert_ext_id = advert_ext_id.substring(2);
+		    		}		    				    	
+		    		
 		    		if(advertFault==true) this.failedAdverts++;
 		    		  else this.successAdverts++; 
 		    		  this.advertFault = false;	
@@ -395,16 +402,16 @@ public class Marketplace {
 					if(!parent.equals(site_mapper.get("root"))){
 			    		tag_name = parent+"/"+tag_name;			    		
 			    	}
-		    	}
-		    	
+		    	}		    	
 		    	//Search the current tag in the mapper
-			    if(site_mapper.get(tag_name)!=null){	
+			    if(site_mapper.get(tag_name)!=null){
 			    	//=========== FOR DEBUGGING=================
 			    	//If we parse by advertId, and the id we're looking for is present in the xml we store this advert.
 				    if(advert_parse_id!=0 && advert_ext_id!=null){			    		
-				    	if(Integer.parseInt(advert_ext_id)==advert_parse_id){				    		
-				    		insert=true;
-							id_found=true;				
+				    	if(advert_ext_id.equals(String.valueOf(advert_parse_id))){
+				    		insert   = true;
+							id_found = true;	
+							found    = true;						
 						}	
 						else{insert=false;}
 					}
@@ -414,11 +421,14 @@ public class Marketplace {
 				    //If we have nested tags, iterate over all siblings and store them in the array list.
 				    do{					    					  
 			     		mapped_tag = site_mapper.get(tag_name);							     	
-			    		attrib 	   = new AttribParser(advert_ext_id, mapped_tag, tag_value);
-			    		attribMetaArray.add(attrib);			    		
-						tag_value  = vn.toNormalizedString(vn.getText());						
+			    		
+			     		if(insert && id_found){	
+			     			attrib = new AttribParser(advert_ext_id, mapped_tag, tag_value);
+				    		attribMetaArray.add(attrib);			
+			     		}			     		
+			    		tag_value  = vn.toNormalizedString(vn.getText());
 				    }while(vn.toElement(VTDNav.NEXT_SIBLING, tag_name));
-			     				
+			     	
 			     	//Store the category and subcategory id of the property. 
 			     	if(site_mapper.get(tag_name).equals("category")){
 			     		String attribute = tag_value; //Dúplex->duplex, Piso->piso, Casa->casa, etc...
@@ -574,11 +584,12 @@ public class Marketplace {
 		Advert a     = new Advert();
 		int counter  = 0;
 		String query = "";	  
-	
+		
+		System.out.println("id: "+attribMetaArray.size()); 
+		
 		//Write the Adverts to the Database	
-//=======================================================================================================================================================
-		//Check if the advert is created. If it's not, create it.
-					
+		//=======================================================================================================================================================
+		//Check if the advert is created. If it's not, create it.					
 			query    = "insert into parser_Adverts(id,user_id,ad_ext_id) values";
 			String queryaux = "insert into parser_AuxAdverts(advert_id) values";		
 			site_adverts = a.getAdvertsByUserId(user_id);		
@@ -663,7 +674,7 @@ public class Marketplace {
 				if(int_id!=null) {
 					attribMetaArray.get(i).setAttribId(Integer.valueOf(int_id));//update the attrib_id(in the table parser_attributes_meta)							
 				}
-			}
+			}						
 //=======================================================================================================================================================	
 			
 		//Write the Meta Attributes	to the DataBase
@@ -676,7 +687,7 @@ public class Marketplace {
 		//get all adverts for the current Agency
 		active_adverts = a.getActiveAdverts(user_id);	
 		query   = "insert into parser_attributes_meta(attrib_id,advert_int_id, attrib_value) values";
-		counter = 0;				
+		counter = 0;							
 		
 		for(int i=0;i<attribMetaArray.size();i++){
 			String key = attribMetaArray.get(i).getAttribId()+"__"+attribMetaArray.get(i).getAdvertId();							
@@ -685,14 +696,14 @@ public class Marketplace {
 				counter++;
 				String attribValue = attribMetaArray.get(i).getAttribValue();
 				attribValue = attribValue.replaceAll("'", "''");
-				attribValue = attribValue.replaceAll("\\'", "''");
-
+				attribValue = attribValue.replaceAll("\\'", "''");							
+		        
 				if(attribMetaArray.get(i).getAdvertId()!=null){						
 					query+="('"+
 							attribMetaArray.get(i).getAttribId()+"','"+
 							attribMetaArray.get(i).getAdvertId()+"','"+
 							attribValue+"'),";			
-				}
+				}				
 			}
 			else if(update){
 				 //If the attribute already exists, check for differences between the one in the database and the one from teh XML
@@ -706,8 +717,13 @@ public class Marketplace {
 					){
 						String[] parts   = key.split("__");
 						String attrib_id = parts[0]; 
-						String advert_id = parts[1];					
-						String update = "update parser_attributes_meta set attrib_value = '"+attribMetaArray.get(i).getAttribValue()+"' where attrib_id = '"+attrib_id+"' and advert_int_id ='"+advert_id+"'";															
+						String advert_id = parts[1];	
+						
+						String attribValue = attribMetaArray.get(i).getAttribValue();
+						attribValue = attribValue.replaceAll("'", "''");
+						attribValue = attribValue.replaceAll("\\'", "''");
+						
+						String update = "update parser_attributes_meta set attrib_value = '"+attribValue+"' where attrib_id = '"+attrib_id+"' and advert_int_id ='"+advert_id+"'";															
 						db.executeUpdate(update);
 					}													
 				}
@@ -755,7 +771,7 @@ public class Marketplace {
 						
 					if(image!=null) {
 						if(i==0) {							
-							tokens  = web_site_adverts.get(i).split("-");
+							tokens  = web_site_adverts.get(i).split("___");
 							String adv_ext_id = tokens[2];						
 							int uplThumb = Advert.isThumbUploaded(attributesArray.get("url_image_thumb"));						
 							if(uplThumb==0) {

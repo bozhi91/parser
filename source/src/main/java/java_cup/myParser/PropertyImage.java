@@ -38,11 +38,14 @@ class imageResize  implements Runnable{
 	@Override
 	public void run() {
 		PropertyImage p = new PropertyImage();
-	
+		boolean resized = false;
+		
 		try {
-			p.resizeFile(source,local,x,y);
-			p.pushS3Object(local, remoteFile);
-			p.deleteFile(local);		
+			resized = p.resizeFile(source,local,x,y);
+			if(resized) {
+				p.pushS3Object(local, remoteFile);			
+			}					
+			p.deleteFile(local);
 		} catch (IOException e){
 			e.printStackTrace();
 		}	
@@ -101,6 +104,8 @@ class PropertyImage {
 		title 	       = tokens[5];	
 		remoteFilePath = "partners_new/"+this.user_id+"/"+this.advert_id+"/";
 				
+		System.out.println(url);
+		
 		//Get the url of the image
 		URL website = new URL(url);	
 		
@@ -115,11 +120,11 @@ class PropertyImage {
 		if(pos>0){extension = filename.substring(pos+1);}	
 		
 		//Normalize the image name. Remove unicode characters like: ñ,ç, á,í,ó, etc. Remove also non-alphanumerical characters except: '_'.
+		title = title.replaceAll("[^A-Za-z0-9_]", "");
 		String imageName  = order+"_"+title+"."+extension;
 		imageName = imageName.replace("..", ".");
 		imageName = java.text.Normalizer.normalize(imageName, java.text.Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+","");
 		int uploadedImage = Advert.isImageUploaded(id);
-		title = title.replaceAll("[^A-Za-z0-9 ]", "");
 
 		try{		
 			if(uploadedImage!=1) {
@@ -129,14 +134,16 @@ class PropertyImage {
 			   	   FileOutputStream fos    = new FileOutputStream(filePath+"o_"+imageName);		   	   
 				   fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				//==== Download the original image =====
-				
-				//===== Upload the original image to S3(Amazon) server =====
-				 pushS3Object(filePath+"o_"+imageName,remoteFilePath+"o_"+imageName);	 
-			
+							
 				 //Store the original image in the memory and delete it.
 				 File input          = new File(filePath+"o_"+imageName);
 				 BufferedImage image = ImageIO.read(input);
 				 this.deleteFile(filePath+"o_"+imageName);
+				
+				 //===== Upload the original image to S3(Amazon) server =====
+				 if(image!=null)
+					 pushS3Object(filePath+"o_"+imageName,remoteFilePath+"o_"+imageName);	 
+			
 				 
 				//Resize the images and upload them to the S3 server. After that, delete the image from the localhost	
 				new Thread(new imageResize(image,filePath+"f_"+imageName,remoteFilePath+"f_"+imageName,Constant.image_full_width,Constant.image_full_height)).start();	
@@ -161,9 +168,14 @@ class PropertyImage {
 	}
 	
 	//Resize the image
-	public void resizeFile(BufferedImage image,String fileName_out, int width, int height) throws IOException{	
+	public boolean resizeFile(BufferedImage image,String fileName_out, int width, int height) throws IOException{	
 		String watermarkImageFile = Constant.watermark;
-		//=====================================================================
+		//=====================================================================		  	
+		  if(image==null) {
+			  System.out.println("Image not readable: "+fileName_out);
+			  return false;
+		  }
+			  			  
 		   int originalWidth  = image.getWidth();
 		   int originalHeight = image.getHeight();
 			  
@@ -197,6 +209,8 @@ class PropertyImage {
        //Write the file to the disk
 	   File output = new File(fileName_out);
 	   ImageIO.write(resized, Constant.image_format, output);
+	   
+	   return true;
     }
    
 	//===== Upload file to the S3 Server =====

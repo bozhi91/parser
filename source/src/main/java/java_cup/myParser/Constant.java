@@ -3,7 +3,7 @@ package java_cup.myParser;
 public class Constant {
 
 	
-/*	public static final String user = "root";
+	/*public static final String user = "root";
 	public static final String dbConfigFile = "./db_connect.json"; 
 	public static final String mapper 		= "./mapper.json";  	
 	public static final String logger 		= "./Log_";
@@ -18,6 +18,7 @@ public class Constant {
 	public static final String logFolder    = "/home/bozhi/Desktop/Logs/";	
 	public static final String imagesFolder	= "/home/bozhi/Desktop/pictures/";
 	public static final String watermark	= "/home/bozhi/Downloads/xmlParser/xmlParser/utils/watermark.jpg";	
+	
 	
 	//===== Image properties =====
 	public static final int image_full_width  = 1200;

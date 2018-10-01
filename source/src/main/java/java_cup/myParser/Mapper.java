@@ -63,6 +63,7 @@ public class Mapper {
         	if(jsonObject.get("site_name").equals(name)){
         			siteFound = true;
         			
+        			//get the category list from the CRM section in the mapper
         			jsonObject_tmp = (JSONObject)jsonObject.get("categories");
         			if(jsonObject_tmp!=null) {
         				for(Object key : jsonObject_tmp.keySet()){
@@ -74,7 +75,7 @@ public class Mapper {
         			//Load CRM data
 	        		CRM.put("site_name",(String) jsonObject.get("site_name"));	            
 	            	CRM.put("root",(String) jsonObject.get("root"));
-	            	CRM.put("xml_guide_path",(String) jsonObject.get("xml_guide_path"));
+	            	CRM.put("xml_guide_path",(String) jsonObject.get("xml_agencies"));
 	            	CRM.put("xml_feeds",(String) jsonObject.get("xml_feeds"));
 	            
 	            	// === Read a JSON Array ===

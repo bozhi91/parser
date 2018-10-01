@@ -19,11 +19,11 @@ public class mainParser {
 	public static String mapper = "kyero";
 	*/
 	
- 	static int agency_id   = 0;  //50;   //2; //The external Id of the agency fom the XML
-	static int advert_id   = 0; //5896; //5890;  //Parse and store ONLY the advert with this ID	
+ 	static int agency_id   = 71;  //50;   //2; //The external Id of the agency fom the XML
+	static int advert_id   = 126; //5896; //5890;  //Parse and store ONLY the advert with this ID	
 
-	public static String CRM    = "trovit";
-	public static String mapper = "homesya";
+	public static String CRM    = "1001_agencias";
+	public static String mapper = "1001_agencias";
 	
 	public static String agenciesFile = null;
 	public static String feedsFile	  = null; 
