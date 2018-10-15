@@ -79,7 +79,7 @@ public class Advert {
 		return hashAdvert;
 	}
 	 
-	  public Map<String,String>  getAdvertsByUserId(int user_id) throws SQLException {			
+	  public Map<String,String>  getAdvertsByUserId(String user_id) throws SQLException {			
 		ArrayList<String> adverts = new ArrayList<String>();
 		DataBase db  = DataBase.getInstance();
 		String query = "select * from parser_Adverts where user_id='"+user_id+"'";
@@ -94,7 +94,7 @@ public class Advert {
 		return hashAdvert;
 	}
 	  
-	  public Map<String,String>  getAdvertTitle(int user_id) throws SQLException {						
+	  public Map<String,String>  getAdvertTitle(String user_id) throws SQLException {						
 			
 		    DataBase db  = DataBase.getInstance();
 			Map<String,String>  hashAdvert = new HashMap <String, String>();
@@ -124,7 +124,7 @@ public class Advert {
 			return hashAdvert;
 		}
 	  
-	  public ArrayList<String> getAdvertImages(int user_id) throws SQLException {			
+	  public ArrayList<String> getAdvertImages(String user_id) throws SQLException {			
 			ArrayList<String> adverts = new ArrayList<String>();
 			DataBase db  = DataBase.getInstance();
 			String query ="";
@@ -172,7 +172,7 @@ public class Advert {
 		}
 	
 	  //Returns all adverts from the DataBase for a given user_id
-	  public Map<String,String> getActiveAdverts(int user_id) throws SQLException{						
+	  public Map<String,String> getActiveAdverts(String user_id) throws SQLException{						
 	
 		DataBase db  = DataBase.getInstance();
 		String query = "select  am.attrib_id, am.advert_int_id, am.attrib_value from parser_Adverts a, parser_attributes_meta am where user_id='"+user_id+"' and a.id=am.advert_int_id";

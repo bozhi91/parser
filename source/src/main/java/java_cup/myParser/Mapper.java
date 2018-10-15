@@ -36,9 +36,9 @@ public class Mapper {
 		
 		String json_mapper = Constant.mapper;//"/home/bozhi/Downloads/mapper.json";
 		JSONParser parser  = new JSONParser();
-        JSONObject jsonObject  = (JSONObject) parser.parse(new FileReader(json_mapper));  
+        JSONObject jsonObject     = (JSONObject) parser.parse(new FileReader(json_mapper));  
         JSONObject jsonObject_tmp = jsonObject;
-        Map<String,String> CRM = new HashMap <String, String>();
+        Map<String,String> CRM    = new HashMap <String, String>();
         ArrayList<Map<String,String>> CRMS = new ArrayList<Map<String,String>>();   
         ArrayList<String> crm_guides = new ArrayList<String>();
         boolean siteFound = false;
@@ -63,6 +63,14 @@ public class Mapper {
         	if(jsonObject.get("site_name").equals(name)){
         			siteFound = true;
         			
+        			//get the ftp attributes from the CRM mapper
+        			jsonObject_tmp = (JSONObject)jsonObject.get("ftp_attribs");
+        			if(jsonObject_tmp!=null) {
+        				for(Object key : jsonObject_tmp.keySet()){
+    	            		CRM.put(key.toString(),(String) jsonObject_tmp.get(key));
+    	            	}	
+        			}
+        			
         			//get the category list from the CRM section in the mapper
         			jsonObject_tmp = (JSONObject)jsonObject.get("categories");
         			if(jsonObject_tmp!=null) {
@@ -77,6 +85,7 @@ public class Mapper {
 	            	CRM.put("root",(String) jsonObject.get("root"));
 	            	CRM.put("xml_guide_path",(String) jsonObject.get("xml_agencies"));
 	            	CRM.put("xml_feeds",(String) jsonObject.get("xml_feeds"));
+	            	CRM.put("xml_inactive_feeds",(String) jsonObject.get("xml_inactive_feeds"));
 	            
 	            	// === Read a JSON Array ===
 	            	/*JSONArray guides = (JSONArray) jsonObject.get("xml_guides");	

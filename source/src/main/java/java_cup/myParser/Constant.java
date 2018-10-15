@@ -2,23 +2,22 @@ package java_cup.myParser;
 
 public class Constant {
 
-	
-	/*public static final String user = "root";
+	public static final String user = "root";
 	public static final String dbConfigFile = "./db_connect.json"; 
 	public static final String mapper 		= "./mapper.json";  	
 	public static final String logger 		= "./Log_";
 	public static final String logFolder    = "./logs/";			
 	public static final String imagesFolder	= "./pictures/";  		
 	public static final String watermark	= "./watermark.jpg"; 
-*/
 	
+	/*
 	public static final String dbConfigFile = "/home/bozhi/Downloads/xmlParser/xmlParser/utils/db_connect.json";
 	public static final String mapper 		= "/home/bozhi/Downloads/xmlParser/xmlParser/utils/mapper.json";
 	public static final String logger 		= "jar_";
 	public static final String logFolder    = "/home/bozhi/Desktop/Logs/";	
 	public static final String imagesFolder	= "/home/bozhi/Desktop/pictures/";
 	public static final String watermark	= "/home/bozhi/Downloads/xmlParser/xmlParser/utils/watermark.jpg";	
-	
+	*/
 	
 	//===== Image properties =====
 	public static final int image_full_width  = 1200;
@@ -36,6 +35,16 @@ public class Constant {
 	public static final String secretKey    = "iXRO4BCoaHlOgGXW4Y1KTf+BRlt3l2rr+xkq75vw";
 	public static final String keyName      = "AKIAJQJTEIRZ7R4M4KSA";	
 	public static final String CDN_SERVER   = "https://cdn.homesya.com/";
+	
+	/*public static final String S3bucketname = "s3bucket";
+	public static final String secretKey    = "807f1d77f0f7920ae608f9a3430c7dd11ffad71e";
+	public static final String keyName      = "0fea4ab0ca7411e88cb3312109b66a69";	
+	public static final String CDN_SERVER   = "https://cdn.homesya.com/";
+	*/
+	//===== FTP Constants =====
+	//public static final String remote_ftp_file = "/AGENCIAS.xml";
+	
+	public static final String id_prefix = "99";
 	
 	public Constant() {}
 }

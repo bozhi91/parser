@@ -20,9 +20,10 @@ import org.omg.CORBA.portable.OutputStream;
 
 public class User {
 
-	private String id_ext;
-	
-	private int id;
+	private static String query = "insert into parser_Users (id,crm_id, user_ext_id, name, email, tel, webpage,feed_url,dni,provincia,localidad,tipo_via,nombre_via,numero_via,cp,country) values ";
+			
+	private String id_ext;	
+	private String id;
 	private int crm_id;
 	private int user_ext_id;
 	private String xml_ads_path="not available";
@@ -42,27 +43,40 @@ public class User {
 	
 	public User(){}
 	
-	public User(ArrayList<String> tagList, int crm_id, Map<String,String> CRM){
-		
+	static int j = 0;
+	
+	public User(ArrayList<String> tagList, int crm_id, Map<String,String> CRM){		
 		String[] tokens;
 		String tag_name  = "";
-		String tag_value = "";
+		String tag_value = "";		
+		this.crm_id = crm_id;		
 		
-		this.crm_id = crm_id;
-		
-		 for(int i=0;i<tagList.size();i++) {			 
+		if(CRM.get("xml_path").equals("none")){
+			this.xml_feeds_path = CRM.get("xml_feeds");
+  		}
+ 
+		for(int i=j;i<tagList.size();i++){
+			 j++;
 			 //Split the attributs: tag name, tag value
-			 tokens  = tagList.get(i).split("___");				
+			 tokens   = tagList.get(i).split("___");				
 			 tag_name = tokens[0];
 			 
-			 if(tokens.length>1)
-				 tag_value = tokens[1];
+			 if(tokens.length>1){
+				 tag_value = tokens[1]; 
+			 }
 		
+			 if(!tag_value.contains("\\'")){
+				 tag_value = tag_value.replaceAll("'", "''");
+			 }
+
 			 //Normalize the id of the property. The id only allows integer numbers.
-			 if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("id")){		      			    	      	
-				tag_value = tag_value.replace("inmo_00", "");
+			 if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("id")){
+				tag_value = tag_value.replace("inmo_", "");
+				if(tag_value.startsWith(""))
+				   tag_value.substring(2, tag_value.length());
+					
 				this.user_ext_id = Integer.valueOf(tag_value);	
-				this.id = Integer.valueOf("9999"+this.crm_id+this.user_ext_id);				
+				this.id =Constant.id_prefix+this.crm_id+this.user_ext_id;					
 		    }
 			else if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("name")){
 	      		name = tag_value;
@@ -77,13 +91,14 @@ public class User {
 	      		phone = tag_value;
 	       	}			      	
 	      	else if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("xml_path")){
-	      		xml_feeds_path = tag_value;		 		      		
+	      		xml_feeds_path = tag_value;		
+	      		System.out.println(xml_feeds_path);
 	       	}  
 	    	//For each webpage, we launch a new scan, looking for adverts
 	      	else if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("web_page")){ 	  
 	      		webpage = tag_value;
 	      	}
-			 //////////////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////////////
 			 
 	    	else if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("dni")){ 	  
 	      		dni = tag_value;
@@ -105,10 +120,10 @@ public class User {
 	      	}	
 	    	else if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("cp")){ 	  
 	    		cp = tag_value;
-	      	}	
-			
+	      	}						
+			 //System.out.println("<<"+tagList.get(i));
 			//Insert the user into the DataBase.
-			if(tagList.get(i).equals("end___")) {
+			if(tagList.get(i).equals("end___")) {		
 				this.insertUser();
 			}				
 		 }
@@ -129,7 +144,7 @@ public class User {
 	}
 	
 	
-	public int getId(){
+	public String getId(){
 		return this.id;
 	}
 
@@ -140,10 +155,9 @@ public class User {
 	public String getName(){
 		return this.name;
 	}
-	
-	
-	public String getId_ext(){
-		return this.id_ext;
+
+	public int getId_ext(){
+		return this.user_ext_id;
 	}
 	
 	public void deleteUsers(int crm_id){	
@@ -204,7 +218,7 @@ public class User {
 		User user = new User();
 		
 		if(rs.next()) {
-			user.id = rs.getInt(1);
+			user.id = rs.getString(1);
 			user.crm_id = rs.getInt(2);
 			user.user_ext_id = rs.getInt(3);
 			user.name = rs.getString(4);
@@ -229,18 +243,20 @@ public class User {
 		return id;
 	}
 	
-	public int getUserByName(int crm_id, String name) throws SQLException{
+	public User getUserByName(int crm_id, String name) throws SQLException{
 		DataBase  db = DataBase.getInstance();
 		String query = "select * from parser_Users where crm_id = '"+crm_id+"' and name='"+name+"'";
 		ResultSet rs = db.executeSelect(query);
 		
-		int id = 0;
+		String id = "";
 		if(rs!=null) {
 			if(rs.next()) {
-				id = rs.getInt(1);
+				this.id 	= rs.getString(1);
+				this.crm_id = rs.getInt(2);				
+				this.user_ext_id = rs.getInt(3);
 			}	
 		}			
-		return id;
+		return this;
 	}
 	
 	public boolean insertUser(){
@@ -248,21 +264,20 @@ public class User {
 		ResultSet rs = null;
 		
 		//Insert the users in the temporary table
-		String query = "insert into parser_AuxUsers (id) values ('9999"+this.crm_id+this.user_ext_id+"')";
-		db.executeInsert(query); 
+		//String query = "insert into parser_AuxUsers (id) values ('9999"+this.crm_id+this.user_ext_id+"')";
+		//db.executeInsert(query); 
 		
 		//if the user exists already, do not create it.
 		 if(this.userExists()) {
 			 try {
-				this.updateUsers("9999"+this.crm_id+this.user_ext_id);
+				this.updateUsers(Constant.id_prefix+this.crm_id+this.user_ext_id);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			 return false;
 		 }
-		
-		query = "insert into parser_Users (id,crm_id, user_ext_id, name, email, tel, webpage,feed_url,dni,provincia,localidad,tipo_via,nombre_via,numero_via,cp,country) "
-				+ "values ('9999"+this.crm_id+this.user_ext_id+"','"
+			
+		this.query+= "('"+Constant.id_prefix+this.crm_id+this.user_ext_id+"','"
 						  +this.crm_id+"', '"
 						  +this.user_ext_id+"', "
 						  +"'"+this.name+"', '"
@@ -276,14 +291,24 @@ public class User {
 						  +",'"+nombre_via+"'"
 						  +",'"+numero_via+"'"
 						  +",'"+cp+"'"
-						  +",'"+country+"'"+")";
+						  +",'"+country+"'"+"),";
 				
-		System.out.println("\t === INFO: Inserting a new user <"+this.name+"> ===\n");
-		 
+		System.out.println("\t === INFO: Inserting a new user <"+this.name+"> ===\n");		 
 		Log log = new Log();		 
-		log.writeLog("\t=== INFO: Inserting a new user <"+this.name+"> ===\n\n");		
-		db.executeInsert(query);		
+		log.writeLog("\t=== INFO: Inserting a new user <"+this.name+"> ===\n\n");
+			
 		return true;
+	}
+	
+	public void executeInsert() {			
+		if(query.endsWith(",")){   
+			query = query.substring(0, query.length() - 1) + ';';			
+		}
+		if(!query.endsWith("values ")){   
+			//System.out.println(this.query);
+			DataBase  db = DataBase.getInstance();
+			db.executeInsert(query);
+		}		
 	}
 	
 	public ArrayList<User> getAllUsers() throws SQLException{		
@@ -300,6 +325,21 @@ public class User {
 		return Users;
 	}
 	
+	public ArrayList<String> getDBUSers() throws SQLException{		
+		DataBase  db = DataBase.getInstance();
+		String query = "select * from parser_Users";
+		ResultSet rs = db.executeSelect(query);
+		
+		ArrayList<String> users = new ArrayList<String>();
+		User user; 
+		
+		while(rs.next()){			
+			users.add(rs.getString(1));
+		}	
+		return users;
+	}
+	
+	
 	public boolean userExists(){
 		DataBase  db = DataBase.getInstance();
 		ResultSet rs = null;
@@ -309,7 +349,7 @@ public class User {
 		try {
 			if(rs!=null){
 				if(rs.absolute(1)){
-					this.id = rs.getInt(1);
+					this.id = rs.getString(1);
 					return true;
 				}
 			}

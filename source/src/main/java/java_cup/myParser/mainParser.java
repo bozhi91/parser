@@ -1,56 +1,68 @@
 package java_cup.myParser;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
+
 import org.json.simple.parser.ParseException;
+
+import com.amazonaws.services.cloudfront.model.Paths;
+import com.ximpleware.AutoPilot;
+import com.ximpleware.VTDGen;
+import com.ximpleware.VTDNav;
+
 import java_cup.internal_error;
 
+
+import static java.nio.charset.StandardCharsets.*;
 public class mainParser {
 	
-	static boolean update  = true;
-	static boolean run = false; 
-	
-/*	static int agency_id   = 96; //The external Id of the agency fom the XML
-	static int advert_id   = 2060;//5615;  //Parse and store ONLY the advert with this ID	
+	static boolean checkDeleted = false;
+	static boolean uploadImages = false;
+	static boolean update = true;
+	static boolean run    = false; 
 
-	public static String CRM    = "molista_kyero";
-	public static String mapper = "kyero";
-	*/
-	
- 	static int agency_id   = 71;  //50;   //2; //The external Id of the agency fom the XML
-	static int advert_id   = 126; //5896; //5890;  //Parse and store ONLY the advert with this ID	
+ 	static int agency_id = 50;//3969;//709;  //50;   //2; //The external Id of the agency fom the XML
+	static int advert_id = 0;//265009;//117528; //5896; //5890;  //Parse and store ONLY the advert with this ID	
 
-	public static String CRM    = "1001_agencias";
-	public static String mapper = "1001_agencias";
-	
+	public static String CRM    = "molista_homesya";
+	public static String mapper = "homesya";
 	public static String agenciesFile = null;
 	public static String feedsFile	  = null; 
-	
+
 	public static void main(String argv[]) 
 	  throws internal_error, java.io.IOException, java.lang.Exception {
-		
-		DataBase db    = new DataBase();		
-		Marketplace mp = new Marketplace(CRM,mapper,update,agency_id,advert_id);
+
+		/*DataBase db  = new DataBase();		
+		Marketplace mp = new Marketplace(CRM,mapper,checkDeleted,update,agency_id,advert_id);
 		mp.parseMarketplaces();
-		 
-			
+		*/
 		//Get the input arguments from the console. 
-		/*splitArgs(argv);
+		
+		splitArgs(argv);
 		if(run){
 			if(validateInput()){		
 				DataBase db    = new DataBase();		
-				Marketplace mp = new Marketplace(CRM,mapper,update, agency_id,advert_id);
+				Marketplace mp = new Marketplace(CRM,mapper,checkDeleted,update,agency_id,advert_id);
 				mp.parseMarketplaces();								
 			}
 			else{
 				System.out.println("#ERROR: Wrong input. Check the manual of the application: ./parser.jar -h");
 				//printHelp();
 			}
-		}*/
+		}
 	 }
 	
+	//ByteBuffer byteBuffer = Charset.forName("UTF-8").encode(myString)
 	private static boolean validateInput() throws FileNotFoundException, IOException, ParseException {
 		
 		String crm_name    = CRM;
@@ -83,10 +95,8 @@ public class mainParser {
 		 return true;
 	}
 	
-	private  static void splitArgs(String argv[]) {
-		
-		boolean wrongInput = false;
-		
+	private  static void splitArgs(String argv[]) {		
+		boolean wrongInput = false;		
 		run = true;
 		if(argv.length==0) {
 			run = false;
@@ -95,7 +105,26 @@ public class mainParser {
 		
 		for(int i=0;i<argv.length;i++){						
 			if(argv[i].equals("-u")) {
-				update = true;
+				checkDeleted = true;	
+				/*Update levels
+					1: Check for deleted agencies
+					2: Update/Reupload only images
+				*/				
+				/* if(++i>=argv.length  || argv[i].startsWith("-")) {
+					 System.out.println("\n Error: Missing mapper name!");
+					 wrongInput = true;
+				 }					
+				 else {
+					switch(argv[i--].charAt(0)) {
+						case '1':
+							checkDeleted = true;
+						break;
+						case '2':
+							uploadImages = true;
+						break;
+					}
+									
+				 }*/
 			}
 			else if(argv[i].equals("-h")) {
 				printHelp();
@@ -109,7 +138,7 @@ public class mainParser {
 				 }					
 				 else  System.out.println("\n Filename: "+argv[i--]);
 			}
-			
+		
 			//Get the mapper name
 			else if(argv[i].equals("-m")) {												
 				 if(++i>=argv.length  || argv[i].startsWith("-")) {

@@ -121,6 +121,14 @@ public class DataBase {
 			log.writeLog("Trace: "+ e.getMessage()+"\n");
 			log.writeLog("********* End Exception *********"+"\n");
 			log.writeLog("==================================================================================\n");		
+			
+			log.exceptionsLog("\n==================================================================================\n");
+			log.exceptionsLog("An exception has occurred: "+"\n");
+			log.exceptionsLog("Query: "+query+"\n");
+			log.exceptionsLog("********* Exception *********"+"\n");
+			log.exceptionsLog("Trace: "+ e.getMessage()+"\n");
+			log.exceptionsLog("********* End Exception *********"+"\n");
+			log.exceptionsLog("==================================================================================\n");			
 		}
 		return 0;
 	}
@@ -146,6 +154,7 @@ public class DataBase {
 			
 		} catch (SQLException e) {
 			log.writeLog("Error Message: "+e.getMessage()+"\n");
+			log.exceptionsLog("Error Message: "+e.getMessage()+"\n");
 			e.printStackTrace();
 		}
 		return 0;
@@ -163,7 +172,6 @@ public class DataBase {
 			ResultSetMetaData rsmd = rs.getMetaData();
 		} catch (Exception e){
 			log.writeLog("Error Message: "+e.getMessage()+"\n");
-			//System.out.println(e);
 		}
 		return rs;
 	}

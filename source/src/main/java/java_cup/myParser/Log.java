@@ -27,7 +27,10 @@ public class Log {
 			
 			//The filename is: jar_dd_mm_yyyy
 			Date date = new Date();
-	    	String logname = Constant.logger+date.getDate()+"-"+date.getMonth()+"-"+(date.getYear()+1900)+".txt";
+	    	String logname = Constant.logger+date.getDate()
+	    			+"-"+(Integer.valueOf(date.getMonth())+1)
+	    			+"-"+(date.getYear()+1900)+".txt";
+	    	
 	    	this.filename  = Constant.logFolder+logname;
 		}			
 	}
@@ -65,6 +68,29 @@ public class Log {
 	    	bw.write("\n"+time+message+"\n");		  
 	    	bw.close();	    	
 	      }catch(IOException ioe){}		  	
+	}
+	
+	public void exceptionsLog(String message){
+		
+		String exceptFile = this.filename;
+		exceptFile = exceptFile.replace("jar", "exception");
+
+		System.out.println("Log "+exceptFile);
+		
+		try{
+	    	File file = new File(exceptFile);
+	    	if(!file.exists()){
+	    	   file.createNewFile();
+	    	}
+	    	
+	    	Date date = new Date();
+	    	String time = "Log from(hh:mm:ss): "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+" -> ";
+	    	
+	    	FileWriter fw     = new FileWriter(file,true);
+	    	BufferedWriter bw = new BufferedWriter(fw);
+	    	bw.write("\n"+time+message+"\n");		  
+	    	bw.close();	    	
+	      }catch(IOException ioe){}  	
 	}
 	
 	public void writeMasterLog(String message){

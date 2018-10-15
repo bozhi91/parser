@@ -60,7 +60,9 @@ public class AttribParser {
 			tag_value = tag_value.replace("inmo_","");
 			tag_value = tag_value.replace("_","");
 		}
-				
+		
+		//System.out.println(tag_name+" - "+tag_value+" "+advert_id);
+		
 		this.advert_id = advert_id;
 		this.value     = tag_value;
 		this.name      = tag_name;

@@ -1,6 +1,31 @@
-
 delete from parser_Adverts;
 delete from parser_attributes;
-delete from parser_attributes_meta;
 delete from parser_Users;
+delete from parser_attributes_meta;
 delete from parser_CRMs;
+
+agency: 709
+advert: 117528
+
+select a.* from anuncios a, parser_Adverts pa 
+where pa.id = a.id
+
+select u.* from usuarios u, parser_Users pu
+where pu.id = u.id
+
+attrib->parking id = 123
+meta->feature_parking:si id = 123
+
+Descriptiopn:
+/var/www/vhosts/homesya.com/httpdocs/scripts/cron
+
+TODO:
+1-indexar las caracteristicas de una propiedad
+2-generar funciones para crear descripcion y nombre de piso.
+3-nothing
+
+:::mapper:::
+"feature_puerta_principal":"feature_puerta_principal"
+
+::: DATABASE :::
+attrib = feature_puerta_principal:madera

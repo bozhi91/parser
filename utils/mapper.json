@@ -1,76 +1,82 @@
 {
 	"CRMs": [
 	{
-			"site_name": "ghestia",
-			"xml_agencies":"/home/bozhi/Downloads/CRMs/ghestia/agencias.xml",
-			"xml_feeds":"/home/bozhi/Downloads/CRMs/ghestia/feeds.xml",
-			"root": "Agencia",
-			"attributes":{
-				"IdAgencia": "id",
-				"Nombre": "name",
-				"DNI": "dni",
-				"Telefono":"phone",
-				"Email":"email",
-				"CodigoColegiado":"codigo_colegiado",
-				"Provincia":"provincia",
-				"Localidad":"localidad",
-				"TipoVia":"tipo_via",
-				"NombreVia":"nombre_via",
-				"NumeroVia":"numero_via",
-				"CodigoPostal":"cp",
-				"PersonaContacto":"persona_contacto",
-				"Fax":"Fax",
-				"PaginaWeb":"pagina_web"
-			},
-			"categories":{
-				"piso_cat":"356",
-				"piso_sub":"373",
-
-				"casa_cat":"356",
-				"casa_sub":"373",
-
-				"local_cat":"356",
-				"local_sub":"373",
-
-				"parking_cat":"356",
-				"parking_sub":"373",
-
-				"suelo_cat":"356",
-				"suelo_sub":"373",
-
-				"oficina_cat":"356",
-				"oficina_sub":"373",
-
-				"otro_cat":"356",
-				"otro_sub":"373",
-
-				"edificio_cat":"356",
-				"edificio_sub":"373",
-
-				"industrial_cat":"",
-				"industrial_sub":""
-			}
+		"site_name": "ghestia",
+		"xml_agencies":"ftp://AGENCIAS.xml",
+		"xml_feeds":"ftp://INMUEBLES_MODIFICADOS.xml",
+		"xml_inactive_feeds":"ftp://INMUEBLES_BORRADOS.xml",
+		"root": "Agencia",
+		"ftp_attribs":{
+			"server":"ftp.ghestia.cat",
+			"port":"21",
+			"user":"homesya",
+			"pass":"WyiAt6n42xPernXmVZBv"
 		},
-		{
-			"site_name": "molista_homesya",
-			"xml_agencies":"https://s3-eu-west-1.amazonaws.com/homesya/xmls/homesya.xml",		
-			"xml_feeds":"",
-			"root": "agency",
-			"attributes":{
-				"id": "id",
-				"name": "name",
-				"country": "country",
-				"email": "email",
-				"phone": "phone",
-				"xml_path": "xml_path",
-				"web_page": "web_page"			
-			},
-			"categories":{
-				"apartamento_cat":"356",
-				"apartamento_sub":"373",
-				"chalet_cat":"356"
-			}	
+		"attributes":{
+			"IdAgencia": "id",
+			"Nombre": "name",
+			"DNI": "dni",
+			"Telefono":"phone",
+			"Email":"email",
+			"CodigoColegiado":"codigo_colegiado",
+			"Provincia":"provincia",
+			"Localidad":"localidad",
+			"TipoVia":"tipo_via",
+			"NombreVia":"nombre_via",
+			"NumeroVia":"numero_via",
+			"CodigoPostal":"cp",
+			"PersonaContacto":"persona_contacto",
+			"Fax":"Fax",
+			"PaginaWeb":"pagina_web",			
+			"xml_path": "none"
 		},
+		"categories":{
+			"piso_cat":"356",
+			"piso_sub":"373",
+			"casa_cat":"356",
+			"casa_sub":"373",
+			"local_cat":"356",
+			"local_sub":"373",
+
+			"parking_cat":"356",
+			"parking_sub":"373",
+
+			"suelo_cat":"356",
+			"suelo_sub":"373",
+
+			"oficina_cat":"356",
+			"oficina_sub":"373",
+
+			"otro_cat":"356",
+			"otro_sub":"373",
+
+			"edificio_cat":"356",
+			"edificio_sub":"373",
+
+			"industrial_cat":"",
+			"industrial_sub":""
+		}
+	},
+	{
+		"site_name": "molista_homesya",
+		"xml_agencies":"https://s3-eu-west-1.amazonaws.com/homesya/xmls/homesya.xml",		
+		"xml_feeds":"",
+		"root": "agency",
+		"attributes":{
+			"id": "id",
+			"name": "name",
+			"country": "country",
+			"email": "email",
+			"phone": "phone",
+			"xml_path": "xml_path",
+			"web_page": "web_page"			
+		},
+		"categories":{
+			"apartamento_cat":"356",
+			"apartamento_sub":"373",
+			"chalet_cat":"356"
+		}	
+	},
 		{
 			"site_name": "habitaclia",
 			"xml_agencies":"http://app.molista.com/XML/habitaclia.xml",		
@@ -191,8 +197,8 @@
 		},
 		{
 			"site_name": "1001_agencias",
-			"xml_agencies": "/home/bozhi/Desktop/1001_agencias_agencias.xml",
-			"xml_feeds":"/home/bozhi/Desktop/1001_agencias_feeds.xml",	
+			"xml_agencies": "https://www.1001portales.com/pasarelas/homesya/homesya_agencias.xml",
+			"xml_feeds":"https://www.1001portales.com/pasarelas/homesya/homesya_feed.xml",	
 			"root": "agency",
 			"attributes": {
 				"agency_cod": "id",
@@ -204,7 +210,8 @@
 				"agency_street":"nombre_via",
 				"agency_city":"provincia",
 				"agency_person_contact":"persona_contacto",
-				"agency_web": "web_page"
+				"agency_web": "web_page",
+				"xml_path": "none"
 			},
 			"categories":{
 				"apartment_cat":"373",
@@ -309,7 +316,7 @@
 			"pool":"pool",
 			"currency":"currency",
 			"built":"built",		
-			"beds":"bedrooms",
+			"beds":"rooms",
 			"baths":"bathrooms",			
 			"price_freq":"modalidad",
 			"new_build":"new_building",			
@@ -348,9 +355,10 @@
 		"root": "inmueble",
 		"attributes": {						
 			"IdFicha": "id",
-			"IdAgencia":"id_agencia",
+			"IdAgencia":"id_agency",
 			"TipoGenerico":"category",
-			"Referencia":"referencia",
+
+			"Slogan":"slogan",
 			"FechaAlta":"alta",
 			"FechaModificacion":"fecha_modificacion",
 			"Estado":"estado",
@@ -362,8 +370,16 @@
 			"TipoVia":"tipo_via",
 			"NombreVia":"nombre_via",
 			"NumeroVia":"numero_via",
-			"SuperficieUtil":"superficie_util",
+			"SuperficieUtil":"floor_area",
 			"SuperficieConstruida":"superficieconstruida",
+
+			"N? de banos":"bathrooms",
+			"Nº de baños":"bathrooms",	
+			"Dormitorios dobles":"double_beds",
+			"Dormitorios individuales":"individual_beds",
+			"Nº de dormitorios":"rooms",
+			"dormitorios":"rooms",
+			"Parking":"parking",
 
 			"PrecioVenta":"precio_venta",
 			"PrecioAlquiler":"precio_alquiler",
@@ -377,15 +393,18 @@
 			"Zona":"zona",
 			"Anuncio":"description",
 			"ReferenciaCatastral":"titol",
-			"Latitud":"latitud",
-			"Longitud":"longitud",
+			"Latitud":"latitude",
+			"Longitud":"longitude",
 			"ContratoExclusividad":"contrato_exclusividad",
 			"FechaFinExclusiva":"fecha_finExclusiva",
 			"ObraNueva":"obra_nueva",
 			"Caracteristica/Descripcion":"property_feature",
 			"Caracteristica/Valor":"feature_value",
 			"foto/url":"url_image",
-			"foto/Nombre":"foto_name"
+			"foto/Nombre":"foto_name",
+
+			"Puerta Principal":"feature_puerta_principal",
+			"Terrazas":"terrazas"
 		}
 	},
 	{
@@ -398,7 +417,7 @@
 			"propietario":"propietario",
 			"email_sucursal":"email_sucursal",
 			"email_comercializadora":"email_comercializadora",
-			
+
 			"venta_01":"venta",
 			"alquiler_01":"alquiler",
 			"alquiler_opcion_venta_01":"alquiler_opcion_venta",
@@ -440,9 +459,9 @@
 			"numeroplanta":"numeroplanta",
 			"anoconstruccion":"anoconstruccion",
 			"gastoscomunidad":"gastoscomunidad",
-			"garaje_01":"garaje_01",
-			"terraza_01":"terraza_01",
-			"ascensor_01":"ascensor_01",
+			"garaje_01":"feature_garaje",
+			"terraza_01":"feature_terraza",
+			"ascensor_01":"feature_ascensor",
 			"trastero_01":"trastero_01",
 			"piscina_01":"piscina_01",
 			"buhardilla_01":"buhardilla_01",
@@ -493,14 +512,13 @@
 	{
 		"site_name": "1001_agencias",
 		"root": "ad",
-		"attributes": {						
-			
+		"attributes": {
 			"id":"id",
+			"agency_cod":"id_agency",
 			"reference":"reference",
 			"title":"title",
 			"title_es":"title_es",
 			"type_agency":"type_agency",
-			"agency_cod":"agency_cod",
 			"sales_type":"sales_type",
 			"property_type":"property_type",
 			"property_category":"category",
@@ -536,7 +554,7 @@
 			"url_video":"url_video",
 			"url_virtualtour":"url_virtualtour",
 			"lift":"lift",
-			"balcony":"balcony",
+			"balcony":"feature_balcony",
 			"gatekeeper":"gatekeeper",
 			"wheelchair_friendly":"wheelchair_friendly",
 			"description_es_short":"description_es_short",
@@ -546,5 +564,5 @@
 			"picture/url":"url_image",
 			"picture/title":"image_title"
 		}
-	},]
+	}]
 }

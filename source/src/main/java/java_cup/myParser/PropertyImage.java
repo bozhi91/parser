@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import com.amazonaws.auth.AWSCredentials;
@@ -48,6 +49,8 @@ class imageResize  implements Runnable{
 			p.deleteFile(local);
 		} catch (IOException e){
 			e.printStackTrace();
+			//Log log = new Log();
+			//log.exceptionsLog(e.toString());			
 		}	
 	}
 }
@@ -103,17 +106,16 @@ class PropertyImage {
 		id   		   = tokens[4];
 		title 	       = tokens[5];	
 		remoteFilePath = "partners_new/"+this.user_id+"/"+this.advert_id+"/";
-				
-		System.out.println(url);
-		
+					
 		//Get the url of the image
 		URL website = new URL(url);	
 		
 		if(url.contains(".molista")){ 
 			url.replace(".molista", "");			
 		}
-
-		filename = url.substring(url.lastIndexOf('/') + 1);	//extract the filename only		
+		
+		//Extract the filename from the url. We convert the name: http://server.com/path/image.jpg to image.jpg
+		filename = url.substring(url.lastIndexOf('/') + 1);		
 		
 		//Get file extension
 		pos = filename.lastIndexOf('.');
@@ -127,8 +129,21 @@ class PropertyImage {
 		int uploadedImage = Advert.isImageUploaded(id);
 
 		try{		
-			if(uploadedImage!=1) {
-				System.out.println("\n Uploading "+(tokens[7])+" out of "+tokens[6]+" images.");				
+			if(uploadedImage!=1){				
+				float progress = ((Float.valueOf(tokens[7]))/Float.valueOf(tokens[6]))*100;
+				DecimalFormat df = new DecimalFormat();
+				df.setMaximumFractionDigits(2);				
+				
+				System.out.print("Uploading "+(tokens[7])+" out of "
+						+tokens[6]
+						+" images("+df.format(progress)
+						+"%). For the advert("+this.advert_id+"), agency("+this.user_id+") ");
+			
+				/*	
+				float progress = (Float.valueOf(tokens[7])/Float.valueOf(tokens[6]))*100;				
+				System.out.printf("Uploading %s out of %s images(%.2f%). For the advert(%s) of the agency(%s)",
+						tokens[7],tokens[6],progress,this.advert_id,this.user_id);*/
+				
 				//==== Download the original image =====
 				   ReadableByteChannel rbc = Channels.newChannel(website.openStream());	
 			   	   FileOutputStream fos    = new FileOutputStream(filePath+"o_"+imageName);		   	   
@@ -137,26 +152,26 @@ class PropertyImage {
 							
 				 //Store the original image in the memory and delete it.
 				 File input          = new File(filePath+"o_"+imageName);
-				 BufferedImage image = ImageIO.read(input);
-				 this.deleteFile(filePath+"o_"+imageName);
+				 BufferedImage image = ImageIO.read(input);				
 				
 				 //===== Upload the original image to S3(Amazon) server =====
 				 if(image!=null)
-					 pushS3Object(filePath+"o_"+imageName,remoteFilePath+"o_"+imageName);	 
-			
+					 pushS3Object(filePath+"o_"+imageName,remoteFilePath+"o_"+imageName);			
 				 
 				//Resize the images and upload them to the S3 server. After that, delete the image from the localhost	
 				new Thread(new imageResize(image,filePath+"f_"+imageName,remoteFilePath+"f_"+imageName,Constant.image_full_width,Constant.image_full_height)).start();	
 				new Thread(new imageResize(image,filePath+"m_"+imageName,remoteFilePath+"m_"+imageName,Constant.image_medium_width,Constant.image_medium_height)).start();	
 				new Thread(new imageResize(image,filePath+"tm_"+imageName,remoteFilePath+"tm_"+imageName,Constant.image_small_width,Constant.image_small_height)).start();	  						
 				 
-				//If everything goes well, delete the image.
+				//If everything goes well, mark the image(in the Database) as uploaded
 				Advert.uploadImage(id,1);			
 			}
 		}
 		catch(IOException e) {
 			Log log = new Log();
 			log.writeLog("#Error: The image <"+url+"> was not downloaded!\n\t #Reason: "+e+"\n\n");
+			log.exceptionsLog("#Error: The image <"+url+"> was not downloaded! Advert_id: "+this.advert_id
+					+". Agency_id:"+this.user_id+"\n\t #Reason: "+e+"\n\n");
 			System.out.println("#Error: The image <"+url+"> was not downloaded!\n\t #Reason: "+e+"\n\n");
 			
 			//Mark the image as NOT uploaded
@@ -208,8 +223,7 @@ class PropertyImage {
           
        //Write the file to the disk
 	   File output = new File(fileName_out);
-	   ImageIO.write(resized, Constant.image_format, output);
-	   
+	   ImageIO.write(resized, Constant.image_format, output);	   
 	   return true;
     }
    
@@ -219,14 +233,16 @@ class PropertyImage {
 		Log log = new Log();
 		
 		log.writeLog("\t=== Info: File uploaded to S3 as: "+remoteFileName+" ===\n");		
-	    System.out.print("\t=== Info: Uploading file to S3 as: "+remoteFileName+" ===");
+	   // System.out.print("\t=== Info: Uploading file to S3 as: "+remoteFileName+" ===");
 	    
 	  //Upload files to Amazon S3
-	    /*s3client.putObject(new PutObjectRequest(bucketName,remoteFileName, new File(localFileName)).withCannedAcl(CannedAccessControlList.PublicRead));
+	    s3client.putObject(new PutObjectRequest(bucketName,remoteFileName, new File(localFileName)).withCannedAcl(CannedAccessControlList.PublicRead));
 	    ((AmazonS3Client) s3client).getResourceUrl
-	    (bucketName, remoteFileName);*/
+	    (bucketName, remoteFileName);
 	    
-	    System.out.println(" [ Done ] ");
+	    //Delete the original file after the upload
+	    this.deleteFile(localFileName);	    
+	    //System.out.println(" [ Done ] ");
 	}
 	
 	public void deleteFile(String filename) {		

@@ -44,10 +44,7 @@ public class CRM {
 		String query = "insert into parser_CRMs (name, xml_agency_path)"
 				+ "values ('"+this.name+"', '"+this.xml_guide_path+"')";
 				
-		db.executeInsert(query);
-		
-		System.out.println("name: "+this.name+" path: "+this.xml_guide_path);
-		
+		db.executeInsert(query);				
 		return true;
 	}
 	
@@ -65,10 +62,8 @@ public class CRM {
 			}
 			
 		} catch(SQLException e1){}
-		
 		return false;
 	}
-	
 	
 	public int getId() {
 		return this.id;
