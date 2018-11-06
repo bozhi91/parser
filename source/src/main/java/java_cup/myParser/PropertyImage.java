@@ -95,7 +95,7 @@ class PropertyImage {
 		String pendingImage = null;	
 		String aux_url = url;
 		String id;
-		
+
 		//Split the arguments
 		String[] tokens  = url.split("___");
 		tokens  = url.split("___");
@@ -118,32 +118,34 @@ class PropertyImage {
 		filename = url.substring(url.lastIndexOf('/') + 1);		
 		
 		//Get file extension
-		pos = filename.lastIndexOf('.');
-		if(pos>0){extension = filename.substring(pos+1);}	
-		
+		if(filename.lastIndexOf('.')>0){extension = filename.substring(pos+1);}	
+						
 		//Normalize the image name. Remove unicode characters like: ñ,ç, á,í,ó, etc. Remove also non-alphanumerical characters except: '_'.
 		title = title.replaceAll("[^A-Za-z0-9_]", "");
 		String imageName  = order+"_"+title+"."+extension;
+
 		imageName = imageName.replace("..", ".");
 		imageName = java.text.Normalizer.normalize(imageName, java.text.Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+","");
 		int uploadedImage = Advert.isImageUploaded(id);
 
 		try{		
 			if(uploadedImage!=1){				
-				float progress = ((Float.valueOf(tokens[7]))/Float.valueOf(tokens[6]))*100;
-				DecimalFormat df = new DecimalFormat();
-				df.setMaximumFractionDigits(2);				
+				String cImageNum = tokens[6];
+				cImageNum = cImageNum.replaceAll("_", "");																
 				
-				System.out.print("Uploading "+(tokens[7])+" out of "
-						+tokens[6]
-						+" images("+df.format(progress)
-						+"%). For the advert("+this.advert_id+"), agency("+this.user_id+") ");
-			
-				/*	
-				float progress = (Float.valueOf(tokens[7])/Float.valueOf(tokens[6]))*100;				
-				System.out.printf("Uploading %s out of %s images(%.2f%). For the advert(%s) of the agency(%s)",
-						tokens[7],tokens[6],progress,this.advert_id,this.user_id);*/
-				
+				//Print the progress of the uploaded images
+				float progress;				
+				try {
+					progress = ((Float.valueOf(tokens[7]))/Float.valueOf(cImageNum))*100;
+					DecimalFormat df = new DecimalFormat();
+					df.setMaximumFractionDigits(2);				
+					
+					System.out.print("Uploading "+(tokens[7])+" out of "
+							+cImageNum
+							+" images("+df.format(progress)
+							+"%). For the advert("+this.advert_id+"), agency("+this.user_id+") ");				
+				}catch(Exception e) {}
+						
 				//==== Download the original image =====
 				   ReadableByteChannel rbc = Channels.newChannel(website.openStream());	
 			   	   FileOutputStream fos    = new FileOutputStream(filePath+"o_"+imageName);		   	   
@@ -189,19 +191,17 @@ class PropertyImage {
 		  if(image==null) {
 			  System.out.println("Image not readable: "+fileName_out);
 			  return false;
-		  }
-			  			  
-		   int originalWidth  = image.getWidth();
-		   int originalHeight = image.getHeight();
+		  }			  			 
+		  int originalWidth  = image.getWidth();
+		  int originalHeight = image.getHeight();
 			  
-	       if(width < height){
-	        	height = Math.round(width * ((float)originalHeight/originalWidth));
-	        }
-	        else if(height < width){
-	        	width = Math.round(height * ((float)originalWidth/originalHeight));
-	        }
-	    //=====================================================================
-		
+	      if(width < height){
+	    	  height = Math.round(width * ((float)originalHeight/originalWidth));
+	      }
+	      else if(height < width){
+	    	  width = Math.round(height * ((float)originalWidth/originalHeight));
+	      }
+	    //=====================================================================		
 	    Image tmp             = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         BufferedImage resized = new BufferedImage(width, height, BufferedImage.SCALE_DEFAULT);
 
@@ -231,18 +231,17 @@ class PropertyImage {
 	public void pushS3Object(String localFileName,String remoteFileName) {		
 		AmazonS3 s3client = initS3Client();
 		Log log = new Log();
-		
-		log.writeLog("\t=== Info: File uploaded to S3 as: "+remoteFileName+" ===\n");		
-	   // System.out.print("\t=== Info: Uploading file to S3 as: "+remoteFileName+" ===");
-	    
-	  //Upload files to Amazon S3
-	    s3client.putObject(new PutObjectRequest(bucketName,remoteFileName, new File(localFileName)).withCannedAcl(CannedAccessControlList.PublicRead));
-	    ((AmazonS3Client) s3client).getResourceUrl
-	    (bucketName, remoteFileName);
-	    
-	    //Delete the original file after the upload
-	    this.deleteFile(localFileName);	    
-	    //System.out.println(" [ Done ] ");
+				
+		//Upload files to Amazon S3 repository
+		try{	
+		   s3client.putObject(new PutObjectRequest(bucketName,remoteFileName, new File(localFileName)).withCannedAcl(CannedAccessControlList.PublicRead));		   
+		   log.writeLog("\t=== Info: File uploaded to S3 as: "+((AmazonS3Client) s3client).getResourceUrl(bucketName, remoteFileName)+" ===\n");		   	    
+		   System.out.println(" Uploaded as: "+((AmazonS3Client) s3client).getResourceUrl(bucketName, remoteFileName));
+		}
+		catch (Exception e){e.printStackTrace();}
+	   
+		//Delete the original file after the upload
+		this.deleteFile(localFileName);
 	}
 	
 	public void deleteFile(String filename) {		

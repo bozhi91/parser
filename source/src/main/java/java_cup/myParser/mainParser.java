@@ -3,51 +3,51 @@ package java_cup.myParser;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-
 import javax.imageio.ImageIO;
-
 import org.json.simple.parser.ParseException;
-
 import com.amazonaws.services.cloudfront.model.Paths;
 import com.ximpleware.AutoPilot;
 import com.ximpleware.VTDGen;
 import com.ximpleware.VTDNav;
-
 import java_cup.internal_error;
-
-
 import static java.nio.charset.StandardCharsets.*;
+
 public class mainParser {
 	
+	//If this shit is true, only will update the deleted adverts, but won't create or update the others
 	static boolean checkDeleted = false;
-	static boolean uploadImages = false;
+	static boolean uploadImages = true;
 	static boolean update = true;
 	static boolean run    = false; 
 
- 	static int agency_id = 50;//3969;//709;  //50;   //2; //The external Id of the agency fom the XML
-	static int advert_id = 0;//265009;//117528; //5896; //5890;  //Parse and store ONLY the advert with this ID	
+ 	static int agency_id = 0;//3969;//709; //The external Id of the agency fom the XML
+	static int advert_id = 0;
 
-	public static String CRM    = "molista_homesya";
-	public static String mapper = "homesya";
+	public static String CRM    = "trovimap";
+	public static String mapper = "trovimap";
 	public static String agenciesFile = null;
 	public static String feedsFile	  = null; 
 
 	public static void main(String argv[]) 
-	  throws internal_error, java.io.IOException, java.lang.Exception {
-
-		/*DataBase db  = new DataBase();		
+			throws internal_error, java.io.IOException, java.lang.Exception{
+		
+	    DataBase db    = new DataBase();		
 		Marketplace mp = new Marketplace(CRM,mapper,checkDeleted,update,agency_id,advert_id);
 		mp.parseMarketplaces();
-		*/
-		//Get the input arguments from the console. 
 		
+		
+	/*	//Get the input arguments from the console. 
 		splitArgs(argv);
 		if(run){
 			if(validateInput()){		
@@ -59,12 +59,11 @@ public class mainParser {
 				System.out.println("#ERROR: Wrong input. Check the manual of the application: ./parser.jar -h");
 				//printHelp();
 			}
-		}
+		}*/
 	 }
-	
-	//ByteBuffer byteBuffer = Charset.forName("UTF-8").encode(myString)
+
+	//Check if the user has specified the crm_name and the mapper name 
 	private static boolean validateInput() throws FileNotFoundException, IOException, ParseException {
-		
 		String crm_name    = CRM;
 		String mapper_name = mapper;
 		
@@ -155,7 +154,7 @@ public class mainParser {
 				 }
 				 else CRM = argv[i--];
 			}
-			//Get the advert external id
+			//Get the agency external id
 			else if(argv[i].equals("-uid") ) {								
 				 if(++i>=argv.length  || argv[i].startsWith("-")) {
 					 System.out.println("\n Error: Missing agency id.");

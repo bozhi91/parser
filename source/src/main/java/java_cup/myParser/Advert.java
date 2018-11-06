@@ -215,8 +215,7 @@ public class Advert {
 			try {
 				if(rs!=null) {
 					while(rs.next()){		
-						return rs.getInt(6);
-					
+						return rs.getInt(6);					
 				}
 				}
 				

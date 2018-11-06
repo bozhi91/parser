@@ -14,8 +14,6 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
 public class Commons {
-
-	
 	//private static FTPClient ftpClient = null;
 	public static boolean createFTPConnection(String server, int port, String user, String pass){
 		 
@@ -24,16 +22,12 @@ public class Commons {
 	     return true;
 	}
 	
-	public static boolean downloadFTPFile(String remoteFile, String destFile, String server, int port, String user, String pass){
-		  
+	public static boolean downloadFTPFile(String remoteFile, String destFile, String server, int port, String user, String pass){		 
+		
 		int FTP_CONNECTION_TIMEOUT = 3000; 		 
-		/*String server = "ftp.ghestia.cat";
-	    int port      = 21;
-	    String user   = "homesya";
-	    String pass   = "WyiAt6n42xPernXmVZBv";*/
-	    FTPClient ftpClient = new FTPClient();
-	     
+	    FTPClient ftpClient = new FTPClient();	     
 	    Log log = new Log();	      
+	   
 	    System.out.println("\nConnecting to ftp server: "+server);
 	    log.writeLog("\nConnecting to ftp server: "+server);
 	      
@@ -64,5 +58,29 @@ public class Commons {
 		}
 	      System.out.println("\t[ DONE ]");
 	      return true;
+	}
+	
+	public static void sendNotification(String message) throws IOException{
+		String url  = "https://api.telegram.org/bot517091407:AAEeNCLcVGyjyExKaJ_oNhOjx-ZG4DqZDoI/sendMessage";
+		//String text = "Critical Failure. The parsing process was terminated! Check the logfile: logname.txt for more information.";
+		message = message.replace(" ","%20");
+
+		System.out.println("=== A message from the XML Parser ===");
+	    Process p = Runtime.getRuntime().exec("curl -s -X POST "+url+" -d chat_id=227254225 -d text="+message);
+	}
+	
+	//Download file from HTTP server
+	public static String downloadFile(String fileUrl) throws IOException{			
+		
+		String filename = null;
+		try {			
+			filename = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
+			URL website = new URL(fileUrl);	
+			ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+		   	FileOutputStream fos    = new FileOutputStream(Constant.xmlFolder+filename);
+			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);	
+		}catch(IOException e){}
+		
+		return Constant.xmlFolder+filename;
 	}
 }

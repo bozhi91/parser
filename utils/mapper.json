@@ -2,6 +2,7 @@
 	"CRMs": [
 	{
 		"site_name": "ghestia",
+		"mapper":"ghestia",
 		"xml_agencies":"ftp://AGENCIAS.xml",
 		"xml_feeds":"ftp://INMUEBLES_MODIFICADOS.xml",
 		"xml_inactive_feeds":"ftp://INMUEBLES_BORRADOS.xml",
@@ -58,7 +59,8 @@
 		}
 	},
 	{
-		"site_name": "molista_homesya",
+		"site_name": "molista",
+		"mapper":"homesya",
 		"xml_agencies":"https://s3-eu-west-1.amazonaws.com/homesya/xmls/homesya.xml",		
 		"xml_feeds":"",
 		"root": "agency",
@@ -101,50 +103,6 @@
 				"casa_cat":"",
 				"casa_sub":""
 			}	
-		},
-		{
-			"site_name": "fotocasa",
-			"xml_agencies":"http://app.molista.com/XML/fotocasa.xml",		
-			"xml_feeds":"",
-			"root": "agency",
-			"attributes":{
-				"id": "id",
-				"name": "name",
-				"country": "country",
-				"email": "email",
-				"phone": "phone",
-				"xml_path": "xml_path",
-				"web_page": "web_page"
-			},
-			"categories":{
-				"apartamento_cat":"356",
-				"apartamento_sub":"373",
-				"duplex_cat":"356",
-				"duplex_sub":"379",
-				"piso_cat":"",
-				"piso_sub":"",
-				"casa_cat":"",
-				"casa_sub":""
-			}	
-		},
-		{
-			"site_name": "molista_casinuevo",
-			"xml_agencies": "http://app.molista.com/XML/casinuevo.xml",
-			"xml_feeds":"",	
-			"root": "agency",
-			"attributes": {
-				"id": "id",
-				"name": "name",
-				"country": "country",
-				"email": "email",
-				"phone": "phone",
-				"xml_path": "xml_path",
-				"web_page": "web_page"
-			},			
-			"categories":{
-				"apartment_cat":"373",
-				"apartment_sub":"356"
-			}
 		},
 		{
 			"site_name": "molista_kyero",
@@ -196,7 +154,7 @@
 			}
 		},
 		{
-			"site_name": "1001_agencias",
+			"site_name": "1001portales",
 			"xml_agencies": "https://www.1001portales.com/pasarelas/homesya/homesya_agencias.xml",
 			"xml_feeds":"https://www.1001portales.com/pasarelas/homesya/homesya_feed.xml",	
 			"root": "agency",
@@ -220,7 +178,7 @@
 		}
 	],
 	"Marketplaces": [{
-		"site_name": "homesya",
+		"site_name": "molista",
 		"root": "ad",
 		"attributes": {
 			"id": "id",
@@ -230,8 +188,8 @@
 			"content": "description",
 			"price":"price",
 			"property_type":"category",
-			"city":"region",
-			"region":"city",
+			"city":"localidad",
+			"region":"provincia",
 			"postcode":"postcode",
 			"city_area":"city_area",
 			"floor_area":"floor_area",
@@ -408,109 +366,7 @@
 		}
 	},
 	{
-		"site_name": "habitaclia",
-		"root": "inmueble",
-		"attributes": {						
-			"id_inmueble":"id",
-			"referencia":"referencia",
-			"id_sucursal":"id_sucursal",
-			"propietario":"propietario",
-			"email_sucursal":"email_sucursal",
-			"email_comercializadora":"email_comercializadora",
-
-			"venta_01":"venta",
-			"alquiler_01":"alquiler",
-			"alquiler_opcion_venta_01":"alquiler_opcion_venta",
-			"traspaso_01":"traspaso_01",
-			"alquiler_temporada_01":"alquiler_temporada",
-			
-			"precio_venta":"precio_venta",
-			"precio_alquiler":"precio_alquiler",
-			"precio_alquiler_opcion_compra":"precio_alquiler_opcion_compra",
-			"precio_traspaso":"precio_traspaso",
-			"precio_alquiler_temporada":"precio_alquiler_temporada",
-			"tipo":"property_type",
-			
-			"tip_inm":"tip_inm",
-			"subtipo":"category",
-			"tip_inm2":"tip_inm2",
-			"provincia":"city",
-			"cod_prov":"cod_prov",
-			"localidad":"region",
-			"cod_pob":"cod_pob",
-			"ubicacion":"address",
-			"cp":"cp",
-			"cod_zona":"cod_zona",
-			"banos":"bathrooms",
-			"aseos":"aseos",
-			"habitaciones":"rooms",
-			
-			"m2construidos":"floor_area",
-			"m2utiles":"m2utiles",
-			"m2terraza":"m2terraza",
-			"m2jardin":"m2jardin",
-			"m2salon":"m2salon",
-			"destacado":"title",
-			"descripcion":"descripcion",
-
-			"calidades":"calidades",
-			"urbanizacion":"urbanizacion",
-			"estadococina":"estadococina",
-			"numeroplanta":"numeroplanta",
-			"anoconstruccion":"anoconstruccion",
-			"gastoscomunidad":"gastoscomunidad",
-			"garaje_01":"feature_garaje",
-			"terraza_01":"feature_terraza",
-			"ascensor_01":"feature_ascensor",
-			"trastero_01":"trastero_01",
-			"piscina_01":"piscina_01",
-			"buhardilla_01":"buhardilla_01",
-			"lavadero_01":"lavadero_01",
-			"jardin_01":"jardin_01",
-			"piscinacom_01":"piscinacom_01",
-			"eqdeportivos_01":"eqdeportivos_01",
-			"vistasalmar_01":"vistasalmar_01",
-			"vistasalamontana_01":"vistasalamontana_01",
-			"vistasalaciudad_01":"vistasalaciudad_01",
-			"cercatransportepub_01":"cercatransportepub_01",
-			"aireacondicionado_01":"aireacondicionado_01",
-			"calefaccion_01":"calefaccion_01",
-			"chimenea_01":"chimenea_01",
-			"cocina_office":"cocina_office",
-			"despacho":"despacho",
-			"amueblado":"amueblado",
-			"vigilancia":"vigilancia",
-			"escaparate":"escaparate",
-			"m2_almacen":"m2_almacen",
-			"m2_fachada":"m2_fachada",
-			"centro_neg":"centro_neg",
-			"planta_diaf":"planta_diaf",
-			"m2_terreno":"m2_terreno",
-			"m2_industrial":"m2_industrial",
-			"m2_oficinas":"m2_oficinas",
-			"m_altura":"m_altura",
-			"entrada_camion":"entrada_camion",
-			"vestuarios":"vestuarios",
-			"edificable":"edificable",
-			"calif_energetica":"calif_energetica",
-			"de_banco":"de_banco",
-			
-			"photo/url":"url_image",
-			"photo/numimagen":"photo_numimagen",
-			"videos":"videos",
-			"video/plataforma":"video_plataforma",
-			"video/url":"video_url",
-			"mapa/latitud":"latitude",
-			"mapa/longitud":"longitude",
-			"mapa/zoom":"mapa_zoom",
-			"mapa/puntero":"mapa_puntero",
-			"producto_premium":"producto_premium",
-			"producto_destacado":"producto_destacado",
-			"producto_oportunidad":"producto_oportunidad"
-		}
-	},
-	{
-		"site_name": "1001_agencias",
+		"site_name": "1001portales",
 		"root": "ad",
 		"attributes": {
 			"id":"id",
@@ -519,14 +375,20 @@
 			"title":"title",
 			"title_es":"title_es",
 			"type_agency":"type_agency",
-			"sales_type":"sales_type",
-			"property_type":"property_type",
-			"property_category":"category",
+			"sales_type":"modalidad",
 			"new_development":"new_development",
+
+			"property_type":"categoria",
+			"property_category":"category",
+			"constructed_area":"floor_area",
+			"rooms":"rooms",
+			"bathroom":"bathrooms",
+
+			"date_ad":"fecha_alta",
 			"zip":"cp",
 			"country":"country",
-			"province":"city",
-			"city":"region",
+			"province":"provincia",
+			"city":"localidad",
 			"location_detail":"location_detail",
 			"street":"street",
 			"show_street":"show_street",
@@ -536,10 +398,12 @@
 			"show_num":"show_num",
 			"longitude":"longitude",
 			"latitude":"latitude",
+
 			"currency":"currency",
 			"price":"price",
 			"rental_deposit":"rental_deposit",
-			"frequency":"deposit_fequency",
+		
+			"parking":"parking",
 			"persons_capacity":"persons_capacity",
 			"build_year":"build_year",
 			"condition":"condition",
@@ -557,12 +421,17 @@
 			"balcony":"feature_balcony",
 			"gatekeeper":"gatekeeper",
 			"wheelchair_friendly":"wheelchair_friendly",
-			"description_es_short":"description_es_short",
-			"description_es":"description_es",
+			
+			"description_es":"description",
+			"description_es_short":"description_es_short",			
 			"description_en_short":"description_en_short",
 			"description_en":"description_en",
 			"picture/url":"url_image",
-			"picture/title":"image_title"
+			"picture/title":"image_title",
+
+			"air_conditioned":"feature_air_conditioned",
+			"furnished":"feature_furnished",
+			"lift":"feature_lift"
 		}
 	}]
 }

@@ -42,26 +42,20 @@ public class AttribParser {
 	}
 	
 	public AttribParser(String advert_id, String tag_name, String tag_value) {
-		
 		//remove all non-numerical characters from the id
 		if(tag_name.contains("id_") || tag_name.contains("_id")) {
 			tag_value = tag_value.replaceAll("[^0-9.]", "");			
-		}
-	
+		}	
 		if(advert_id.startsWith("00")){
 			advert_id = advert_id.substring(2);
-		}
-		
+		}		
 		if(tag_value.startsWith("00")){
 			tag_value = tag_value.substring(2);
-		}	
-		
-		if(tag_value.contains("inmo")) {
+		}			
+		if(tag_name.contains("id") && tag_value.contains("inmo")) {
 			tag_value = tag_value.replace("inmo_","");
 			tag_value = tag_value.replace("_","");
 		}
-		
-		//System.out.println(tag_name+" - "+tag_value+" "+advert_id);
 		
 		this.advert_id = advert_id;
 		this.value     = tag_value;

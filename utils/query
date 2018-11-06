@@ -1,7 +1,7 @@
 delete from parser_Adverts;
 delete from parser_attributes;
-delete from parser_Users;
 delete from parser_attributes_meta;
+delete from parser_Users;
 delete from parser_CRMs;
 
 agency: 709
@@ -29,3 +29,206 @@ TODO:
 
 ::: DATABASE :::
 attrib = feature_puerta_principal:madera
+
+
+
+
+***************************************************************************************
+
+
+
+elastic_inserta_anuncio($id_anuncio,1);
+//cache_borra_anuncio($id_anuncio);
+
+
+
+***************************************************************************************
+error_reporting(E_ALL & ~E_NOTICE);
+ini_set("display_errors", "on");
+ini_set('memory_limit', '-1');
+ini_set('max_execution_time', 30000);
+ini_set('default_socket_timeout', 60000);
+set_time_limit(0); //ejecuta infinito hasta que acabe
+
+
+
+use \ForceUTF8\Encoding;
+include_once 'vendor/autoload.php';
+
+
+
+/*
+ * Parametros
+ * 
+ * $argv[1] = nombre_afiliado
+ * $argv[2] = desde_anuncios
+ * $argv[3] = id_anuncio_a_buscar
+ * 
+ * 
+ */
+
+if($_REQUEST["argv_1"]){
+    $argv[1] = $_REQUEST["argv_1"];
+}
+
+if($_REQUEST["argv_2"]){
+    $argv[2] = $_REQUEST["argv_2"];
+}
+
+if($_REQUEST["argv_3"]){
+    $argv[3] = $_REQUEST["argv_3"];
+}
+
+
+ini_set('default_socket_timeout', 6000);
+ini_set("memory_limit", "40000M");
+set_time_limit(0); //ejecuta infinito hasta que acabe
+
+
+setlocale(LC_ALL, 'es_ES.UTF8');
+function toAscii($str, $replace=array(), $delimiter='-') {
+    if( !empty($replace) ) {
+        $str = str_replace((array)$replace, ' ', $str);
+    }
+
+    $clean = iconv('UTF-8', 'ASCII//TRANSLIT', $str);
+    $clean = preg_replace("/[^a-zA-Z0-9\/_|+ -]/", '', $clean);
+    $clean = strtolower(trim($clean, '-'));
+    $clean = preg_replace("/[\/_|+ -]+/", $delimiter, $clean);
+
+    return $clean;
+}
+
+$arrayConversionProvincias = array('Donostia-San Sebastián'=>'Guipuzcua','Balears (Illes)'=>'Baleares');
+
+
+//$debugAdmin = 1;
+
+// $mtime = microtime();
+// $mtime = explode(" ",$mtime);
+// $mtime = $mtime[1] + $mtime[0];
+// $tiempoinicial = $mtime;
+
+// ini_set("display_errors","on");
+// // set_time_limit(0);
+// // ini_set('memory_limit', '-1');
+// error_reporting("E_ALL");
+
+header('Content-Type: text/html; charset=utf-8');
+
+
+$page_pos = "script_carga";
+
+
+/*************** DETECTAR EL PATH ********************/
+$actual_path = dirname(__FILE__);
+$actual_path_tmp = explode ("/", $actual_path);
+$chivato = 0; $n = 0;
+$control = count ($actual_path_tmp);
+$actual_path = "";
+while ($chivato != 1 && $n < $control){
+	$actual_path .= $actual_path_tmp[$n]."/";
+	//$str_info.= $actual_path_tmp[$n]."/e";
+	if ( strstr($actual_path_tmp[$n], "casinuevo")){
+		$ext_tmp = explode (".", $actual_path_tmp[$n]);
+		$ext = $ext_tmp[1];
+	}
+	if ($actual_path_tmp[$n] == "httpdocs"){
+		$chivato = 1;
+	}
+	$n++;
+}
+
+$_SERVER['DOCUMENT_ROOT'] = $actual_path;
+
+/*******************************************************/
+
+
+include_once $_SERVER['DOCUMENT_ROOT'].'/webservice/geocoder/geocoder.php';
+
+
+
+$Geocoder = new GoogleMapsGeocoder();
+
+function sendPost($data,$url) {
+     
+    $ch = curl_init();
+    // you should put here url of your getinfo.php script
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch,  CURLOPT_RETURNTRANSFER, true);
+    //curl_setopt($ch, CURLOPT_GET, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    $result = curl_exec ($ch);
+    curl_close ($ch);
+    return $result;
+}
+
+
+//Genero el $ext para que cree los arrays de los paises correspondientes
+
+	// id = 14 AFILIADO: Arca24 Mexico
+	// id = 28 AFILIADO: SEAN inmoviliario Mexico
+
+
+if($argv[1] == 28 || $argv[1] == 14){ 
+	$ext = "com.mx";
+}
+
+
+include($_SERVER['DOCUMENT_ROOT']."globales.inc.php");
+include($_SERVER['DOCUMENT_ROOT']."inc/class/simpleXml.class.php");
+*************************************************************************
+
+
+ === CRMs ===
+
+ - ghestia: done
+ - molista/homesya: done
+ - 1001_agencias... doing
+    
+
+
+
+=======================================================
+
+Limpiar agencias viejas: scripts/cron/limpieza
+
+- hacer update de los anuncios tabmien
+- hacer update de la tabla 'usuarios' actualizar el campo id_crm_ext
+
+- revisar que no se dupllquen agencias
+
+- por cada usuario/agencia:
+    1 cambiar el id de 9999 a 99
+    2 poner id_ext
+    3 poner crm_id_ext
+
+!!! reinsertar todas la agencias del CRM MOLITA
+
+- guardar los comandos de java.jar en un .sh
+- poner el .sh en crone job
+
+
+******crear tabla en produccion de CRMs - y que no se borre nunca!!!!!!!!****
+
+*****tabla de attributos y metaatributos
+
+
+
+//Borra un anuncio o un set de anuncios
+elastic_borra_anuncio('',999943709)
+=======================================================
+
+
+Usuarios a eliminar: 
+SELECT * FROM `usuarios` WHERE id like '999943%' 
+
+
+==================================================================
+
+
+java -jar ./parser.jar -c 1001portales -m 1001portales -uid 4004
+/opt/plesk/php/7.0/bin/php parser.php 1001portales 1 544004 544004265254
+
+
+https://www.indeed.es/ver-oferta?jk=fd6fef3d4bdc297e&from=rje&rgtk=1cra52a7i3854800

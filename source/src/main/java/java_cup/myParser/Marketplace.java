@@ -6,16 +6,19 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.awt.List;
 import java.beans.Statement;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.FileSystems;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.json.simple.parser.ParseException;
+
+import com.amazonaws.services.cloudfront.model.Paths;
 import com.ximpleware.AutoPilot;
 import com.ximpleware.IndexReadException;
 import com.ximpleware.NavException;
@@ -77,9 +82,33 @@ public class Marketplace {
 	public  int failedImages = 0;
 	public  int failedTags   = 0;
 	
-	public void parseMarketplaces() throws XPathParseException, XPathEvalException, NavException, IOException, SQLException, ParseException{			
-		Advert.emptyAuxTable();
-		parseCRM(this.CRM,this.agency);
+	public void parseMarketplaces() throws XPathParseException, XPathEvalException, NavException, IOException, SQLException, ParseException{
+		try {			
+			//Delete the xml files first so we can download them and work with a fresh/updated copy
+			Runtime.getRuntime().exec("rm -rf "+Constant.xmlFolder+"*.xml");
+			
+			Advert.emptyAuxTable();
+			parseCRM(this.CRM,this.agency);
+		}catch(Exception e){
+			
+			String errorMessage = "Exception: "
+					+"<"+e.toString()+">"			
+					+". File: "+e.getStackTrace()[0].getFileName()
+					+". Classname: "+e.getStackTrace()[0].getClassName()
+					+". Method: "+e.getStackTrace()[0].getMethodName()
+					+". Line: "+e.getStackTrace()[0].getLineNumber();
+			
+			Log log   = new Log();
+			log.writeLog(errorMessage+" Stack trace: "+e.getStackTrace());
+			
+			/*System.out.println(errorMessage+" "+System.err.toString());			
+			StringWriter errors = new StringWriter();
+			e.printStackTrace(new PrintWriter(errors));
+			*/
+			
+			String text = "=== Critical Failure === The parsing process was terminated! Check the logfile: logname.txt for more information.";		 
+			Commons.sendNotification(text+" "+errorMessage);		    
+		}	
 	    //Monitoring the threads running on background
 	    //new Thread(new threadDispatcher()).start();
 	}
@@ -106,7 +135,7 @@ public class Marketplace {
 		CRM crm = new CRM(CRM);
 		crm.createNewCRM();
 		int crm_id     = crm.getCrmByName(CRM_name).getId();	
-		String fileURL = CRM.get("xml_guide_path");//crm.getCrmByName(CRM_name).getXmlPath();
+		String fileURL = CRM.get("xml_guide_path");//get the url to the xml file with the agencies
 		
 		System.out.println("\n === Parsing CRM Guide: "+fileURL+" ===");
 		log.writeLog("\n === Parsing CRM Guide: "+fileURL+" ===\n");
@@ -114,10 +143,15 @@ public class Marketplace {
 		
 		//========================== DOWNLOAD THE XML FILE WITH THE AGENCIES ==========================
 		final VTDGen vg = new VTDGen();
-		boolean status  = false;		 
+		boolean status  = false;
+		
 		//Detect if the XML file is stored locally or remotely.	
 		if(fileURL.contains("http")){//the XML file is stored on HTTP/HTTPS server
-			status = vg.parseHttpUrl(fileURL, true);	
+			//status = vg.parseHttpUrl(fileURL, true);			
+			String filename = Commons.downloadFile(fileURL);			
+			if(filename!=null){//Do this if the file was downloaded
+				status = vg.parseFile(filename, true);
+			}				
 		}
 		else if(fileURL.contains("ftp")){//the XML file is stored on FTP server			
 			fileURL = fileURL.substring(6, fileURL.length());
@@ -129,8 +163,9 @@ public class Marketplace {
 					CRM.get("pass"));
 			
 			fileURL="./"+fileURL;			
-			if(status)//do this if the file was downloaded
+			if(status){//Do this if the file was downloaded				
 				status = vg.parseFile(fileURL, true);
+			}			
 		}	
 		else {//the XML file is stored in the local machine
 			status = vg.parseFile(fileURL, true);			   
@@ -150,7 +185,7 @@ public class Marketplace {
     	String tag_name  = "";
     	String tag_value = "";  
     	String site_id   = "";
-    	boolean id_found=false, insert=false;
+    	boolean id_found = false, insert=false;
     	
     	//Iterate over all tags from the XML
 	    ap.selectElement("*");
@@ -175,18 +210,20 @@ public class Marketplace {
 
 				   while(site_id.startsWith("0")){
 					   site_id = site_id.substring(1, site_id.length());
-				   }				  					
-		      	  if(agency_id!=0){ //if we want to filter by agency id		      		
-						if(Integer.valueOf(site_id)==agency_id){
-							id_found = true;
-							insert   = true;						 						      
-						}
-						else insert = false;
-		      		}
-		      		else {
-		      			id_found = true;
-		      			insert   = true;
-		      		}		      	
+				   }		
+				   //========== FILTER BY AGENCY ID ==========
+			       if(agency_id!=0){ //if we want to filter by agency id		      		
+			    	   if(Integer.valueOf(site_id)==agency_id){
+			    		   id_found = true;
+			    		   insert   = true;						 						      
+					   }
+					   else insert = false;
+			      	}
+			      	else{
+			      		id_found = true;
+			      		insert   = true;
+			      	}	
+		      	  //========== FILTER BY AGENCY ID ==========
 		      		numSites++;
 		       	}		  
 		      	//Check if the agency we're currently parsing is already present in the database.
@@ -195,8 +232,7 @@ public class Marketplace {
 		      	}
 		      	if(id_found){		      		
 		      		tagList.add(tag_name+"___"+tag_value);
-		      	}		
-		        
+		      	}		        
 		        //Store the tagnames for the agency in the database in table: parser_Attributes
 		        AttribParser a = new AttribParser();
 		        a.insertAttribute(CRM.get(tag_name));
@@ -219,9 +255,9 @@ public class Marketplace {
   		if(user!=null) {
   		   user.executeInsert();
   		}
-  		
+  
   		String feeds = CRM.get("xml_feeds");  		  		
-	    for(int i=0; i<agencies.size();i++){	    	
+	    for(int i=0; i<agencies.size();i++){
 	    	//IF the CRM doesn't have a link/URL to the adverts.xml, that means there is only ONE XML(with adverts) for ALL agencies
 	    	//They're porbably mixed(adverts and agencies) in the same XML
 	    	if(CRM.get("xml_path").equals("none")){
@@ -229,28 +265,26 @@ public class Marketplace {
 	    	}
 	    	else{
 	    		feeds = agencies.get(i).getXmlFeedsPath();
-	    	}
-	    	
+	    	}	    	
 	    	if(agency_id!=0){ //filter by agencyID	    	    			    	
 				if(agencies.get(i).getId().equals(Constant.id_prefix+crm_id+agency_id)){				
 					id_found = true;					
-					//new Thread(new  parseAdvertsBG(feeds, this.agency, agencies.get(i).getName(), crm_id, "99"+crm_id+agencies.get(i).getId() )).start();
-					parseXmlAdverts(feeds, this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId());
-					//System.out.println("-------"+agencies.get(i).getXmlFeedsPath());
+					System.out.println("\n===> Parsing agency with external id:<"+agency_id+">. Agency name:<"+agencies.get(i).getName()+">\n");
+					//new Thread(new  parseAdvertsBG(feeds, this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId() )).start();
+					parseXmlAdverts(feeds, this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId());										
 				}				
 	    	}else{
 	    		//System.out.println(agencies.get(i).getId()+" name: "+agencies.get(i).getName()+" feeds: "+feeds);
 	    		id_found = true;
-	    		//new Thread(new  parseAdvertsBG(feeds, this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId())).start();
-	    		//parseXmlAdverts(feeds, this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId());
+	    		System.out.println("\n===> Parsing agency with external id:<"+agencies.get(i).getId_ext()+">. Agency name:<"+agencies.get(i).getName()+">\n");
+	    		//new Thread(new  parseAdvertsBG(feeds, this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId() )).start();
+	    		parseXmlAdverts(feeds, this.agency,agencies.get(i).getName(), crm_id, agencies.get(i).getId());
 	    	}
 	    }
   		    	    
+	    //IF the agency has a separated XML file with the deleted adverts, then check the file and store those adverts in the database
 	    deleteInactiveAgencies(CRM,crm_id);
-	    
-	    if(agency_id!=0 && user!=null){
-    		System.out.println("\n\t === The parsing for the agency with external id <"+agency_id+"> ===");
-  		}  		
+			
 	    if(!id_found && agency_id!=0){
         	System.out.println("\n\t === Agency with id <"+agency_id+"> was not found! ===");
         	log.writeLog("\n\t === Agency with id <"+agency_id+"> was not found! ===");
@@ -288,12 +322,35 @@ public class Marketplace {
 	    }
 	  
 	  //If the remote xml document is not accessible, exit
-	    boolean status  = false;	    
-	    final VTDGen vg = new VTDGen();	   
-
-		//Detect if the XML file is stored locally or remotely.	
+	    boolean status   = false;	    
+	    final VTDGen vg  = new VTDGen();	   
+	    String localFile = Constant.xmlFolder+filename.substring(filename.lastIndexOf('/') + 1);
+	    boolean integrated = false;//This defines if the agencies and the feeds goes in the same XML file
+	    
+	    //This will check if the ID_Agency is integrated in the XML with the adverts
+	    integrated = isAgencyIntegrated(mapper);
+	  
+	    //If the agency_id is not integrated in the xml feeds, delete the feeds.xml
+	    if(!integrated){
+		    Runtime.getRuntime().exec("rm -rf "+localFile);	
+	    }
+	    
+	    //Detect if the XML file is stored locally or remotely.	
 		if(filename.contains("http")){//the XML file is stored on HTTP/HTTPS server
-			status = vg.parseHttpUrl(filename, true);	
+			//status = vg.parseHttpUrl(filename, true);					
+				
+		    File file = new File(localFile);			
+		    if(!file.exists()){
+				System.out.println(" === Downloading file: <"+filename+"> ===");				
+				filename = Commons.downloadFile(filename);	
+			}
+			else{
+				filename = filename.substring(filename.lastIndexOf('/') + 1);	
+				filename = Constant.xmlFolder+filename;
+			}			
+			if(filename!=null){//Do this if the file was downloaded
+				status = vg.parseFile(filename, true);
+			}		
 		}
 		//The XML file is stored on FTP server. In that case, download the xml file
 		else if(filename.contains("ftp")){			
@@ -303,15 +360,14 @@ public class Marketplace {
 					CRM.get("server"),
 					Integer.valueOf(CRM.get("port")),
 					CRM.get("user"),
-					CRM.get("pass"));
-			
-			filename="./"+filename;
-			status  = vg.parseFile(filename, true);    
+					CRM.get("pass"));						
+			filename = Constant.xmlFolder+filename;			
+			status   = vg.parseFile(filename, true);    
 		}	
 		else{//the XML file is stored in the local machine
 			status = vg.parseFile(filename, true);			   
 		}
-
+	
 	    //Check if the given XML file is accessible
 	    if(!status){
 	    	System.out.println("#Error: The xml-adverts file <"+filename+"> is not accessible!! ");
@@ -328,11 +384,9 @@ public class Marketplace {
 	    ArrayList<String> adverts         = new ArrayList<String>();
 	    ArrayList<String> agencies        = new ArrayList<String>();	   
 	    ArrayList<String> attributes      = new ArrayList<String>();	   	 
-	    ArrayList<AttribParser> attribMetaArray = new ArrayList<AttribParser>();
-	    
+	    ArrayList<AttribParser> attribMetaArray    = new ArrayList<AttribParser>();	   
 	    Map<String,ArrayList<String>> agencies_map = new HashMap <String, ArrayList<String>>();
-	    ////////////////////////////////////////////////////////////////////////////////////////
-	    
+	    ////////////////////////////////////////////////////////////////////////////////////////	   
 	    boolean insert = false, id_found = false;
 	    boolean insert_age = false, id_found_age = false;
 	    
@@ -351,12 +405,11 @@ public class Marketplace {
 
 	    String tag_name   	 = "";	   
 	    String advert_id_tmp = "";
-	    boolean ghestia = false;	
-	    
+	      
         ap.selectElement("*");               
         while(ap.iterate()){
         	if(vn.getText()!=-1){
-		    	tag_name  = vn.toString(vn.getCurrentIndex());    
+		    	tag_name  = vn.toString(vn.getCurrentIndex());		    			 
 		      	String tag_value = vn.toNormalizedString(vn.getText());
 		    	String tmp    = vn.toString(vn.getCurrentIndex());  
 		    	String parent = null;
@@ -364,64 +417,60 @@ public class Marketplace {
 		    	String agency_id  = "";	
 		    	AttribParser attrib;		    				   
 
-		    	//Get the ID of the advert. We also normalize the id. Remove al non-numerical characters and so on.
+		    	//Get the ID of the advert. We also normalize the id. Remove all non-numerical characters and so on.
 		    	//======================= PROCESS THE ID OF THE ADVERT =======================================
-		    	if(site_mapper.get(tag_name)!=null && site_mapper.get(tag_name).equals("id")){
-		    		ghestia = false;
+		    	if(site_mapper.get(tag_name)!=null && site_mapper.get(tag_name).equals("id")){		    		
 		    		advert_id_tmp = tag_value;
 		    		advert_ext_id = tag_value;//Get the advertId from the XML	
 		    		advert_ext_id = advert_ext_id.replaceAll("[^0-9.]", "");
 		    			
 		    		while(advert_ext_id.startsWith("0")){
 		    			advert_ext_id = advert_ext_id.substring(1);
-		    		}			    				    		
-		    		
+		    		}			    				    				    		
 		    		if(advertFault==true) this.failedAdverts++;
 		    		else this.successAdverts++; 
 		    		this.advertFault = false;	
-		    		
-		    		//=========== FOR DEBUGGING=================
-			    	//If we parse by advertId, and the id we're looking for is present in the xml we store this advert.
-		    		if(advert_parse_id!=0 && advert_ext_id!=null){			    		
+		    				    				    		
+		    		//=========== FOR DEBUGGING =================
+			    	//=========== FILTER BY ADVERT ID ===========   		    		
+		    		if(advert_parse_id!=0 && advert_ext_id!=null){
 				    	if(advert_ext_id.equals(String.valueOf(advert_parse_id))){
 				    		insert_age   = true;
-							id_found_age = true;							
+							id_found_age = true;
 						}	
 						else{insert_age=false;}
 					}
 					else{
-						if(!ghestia){
+						if(!integrated){									
 							insert_age=true;id_found_age=true;
 						}						
 					}	
-			    	//=========== FOR DEBUGGING=================
+			    	//=========== FOR DEBUGGING =================
 			    }
 		    	//======================= PROCESS THE ID OF THE ADVERT =======================================
 		    	
 		    	//======================= PROCESS THE ID OF THE AGENCY =======================================
 		    	//we enter this condition if and only if the advert/feed holds the AgencyId. In our case - Ghestia
 		    	if(site_mapper.get(tag_name)!=null && site_mapper.get(tag_name).equals("id_agency")){		    	
-		    		String value = tag_value;
-		    		ghestia 	 = true;
-		    		
+		    		String value = tag_value;		    		
+
 		    		value = value.replace("inmo_", "");		    		
 		    		while(value.startsWith("0")){
 		    			value = value.substring(1);
-		    		}		
-		    		//get the agency_id from the adverts.xml
-		    		if(site_id.equals(Constant.id_prefix+String.valueOf(crm_id)+value)){				    			
-		    			advert_ext_id = advert_id_tmp;			    			
+		    		}
+		    		//Get the agency_id from the adverts.xml
+		    		if(site_id.equals(Constant.id_prefix+String.valueOf(crm_id)+value)){
+		    			advert_ext_id = advert_id_tmp;
 		    			if(advert_ext_id.contains("_")){
-				    		String[] tokens = advert_ext_id.split("_");			 		    	
+				    		String[] tokens = advert_ext_id.split("_");
 				    		advert_ext_id   = tokens[2];
 		    			}		    			
 		    			insert_age   = true;
-						id_found_age = true;	
+						id_found_age = true;
 		    		}
-		    		else{insert_age=false;}		    		
+		    		else{insert_age=false;}
 		    	}
 		    	//======================= PROCESS THE ID OF THE AGENCY =======================================
-		    	//else{insert_age = true; id_found_age = true;}
 		    	
 		    	//========== GET THE PARENT TAG IF WE HAVE NESTED TAGS ========== 
 		    	if(!vn.toElement(VTDNav.NEXT_SIBLING,tag_name)){
@@ -433,13 +482,12 @@ public class Marketplace {
 					if(!parent.equals(site_mapper.get("root"))){
 			    		tag_name = parent+"/"+tag_name;
 			    	}
-		    	}	
+		    	}			    	
 		    	//========== GET THE PARENT TAG IF WE HAVE NESTED TAGS ==========
 		    	
 		    	//Search the current tag in the mapper
 			    if(site_mapper.get(tag_name)!=null){			    	
-				    //If we have nested tags, iterate over all siblings and store them in the array list.					
-				    //If(insert_age && id_found_age){				    
+				    //If we have nested tags, iterate over all siblings and store them in the array list.
 				    if(advert_ext_id!=null){
 				    	do{	    	
 					    	mapped_tag = site_mapper.get(tag_name);
@@ -451,7 +499,7 @@ public class Marketplace {
 					    	}
 				    		//Get the bathrooms, bathrooms, and other special attributes. Do this only for ghestia.
 					    	//Index a specific property features
-					    	if(site_mapper.get(tag_name)!=null && site_mapper.get(tag_name).equals("property_feature") && ghestia){	
+					    	if(site_mapper.get(tag_name)!=null && site_mapper.get(tag_name).equals("property_feature") && integrated){	
 					    		//Special charset encoding. For spanish symbols like: ñ,ç á,é, etc.. DOUGH!! :/					    		
 					    		tag_value = java.text.Normalizer.normalize(tag_value, java.text.Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+","");
 					    		
@@ -464,14 +512,14 @@ public class Marketplace {
 					    		tag_value = vn.toNormalizedString(vn.getText());					    		
 					    		//mapped_tag+=":"+tag_value;-> store this in attrib_meta
 					    	}
-					    	attrib  = new AttribParser(advert_ext_id, mapped_tag, tag_value);				     	
+					    	attrib  = new AttribParser(advert_ext_id, mapped_tag, tag_value);					    						    
 					    	attribMetaArray.add(attrib);				    				    		
 					    	tag_value  = vn.toNormalizedString(vn.getText());				    		
 					    }while(vn.toElement(VTDNav.NEXT_SIBLING, tag_name));
 				    }
 				    
 			     	//Store the category and subcategory id of the property. 
-				    //==================== PROPERTY CATEGORY ====================
+				    //==================== GET THE PROPERTY CATEGORY ====================
 			     	if(site_mapper.get(tag_name).equals("category")){
 			     		String attribute = tag_value; //Dúplex->duplex, Piso->piso, Casa->casa, etc...
 			     		
@@ -487,7 +535,7 @@ public class Marketplace {
 						if(cat==null || subcat==null){						
 							 if(categoryList.indexOf(attribute)==-1){	
 								categoryList.add(attribute);	 
-								System.out.println("----> The attribute <"+attribute+"> is not mapped in the categories list.");								
+								//System.out.println("----> The attribute <"+attribute+"> is not mapped in the categories list.");								
 								masterLog.writeMasterLog(" The attribute <"+attribute+"> is not mapped in the categories list.");	
 								this.advertFault=true;
 								this.failedTags++;
@@ -504,13 +552,13 @@ public class Marketplace {
 					     	attribMetaArray.add(attrib);
 						}						
 			     	}//end category if();
-			     	//==================== PROPERTY CATEGORY ====================
+			     	//==================== GET THE PROPERTY CATEGORY ====================
 			     	
 			    	//Store each XML label only once in the array with attributes				    
 					 if(attributes.indexOf(mapped_tag)==-1 && (mapped_tag!=null || !mapped_tag.equals("null")) && !this.checkDeleted){	
 					    attributes.add(mapped_tag);						    					 
-					 }    	
-		
+					 }    								
+					 
 					//Selective storage. If we're filtering by advertID, we store only the advert with this id.  
 					if(advert_ext_id!=null && mapped_tag!=null){
 					   	//Create array list of adverts
@@ -518,7 +566,7 @@ public class Marketplace {
 					   		if(insert_age && id_found_age){
 					   		 	adverts.add(advert_ext_id);
 					   			insert_age = false;
-					   			if(this.checkDeleted){continue;}					   			
+					   			if(this.checkDeleted){continue;}//if we only want to update the deleted adverts, skip the code below					   			
 					   			//agencies_map.replace(site_id, null, adverts);
 					   		}					   			
 					   	}		      	
@@ -539,7 +587,7 @@ public class Marketplace {
 			    	 	if(unmappedAttribs.indexOf(tag_name)==-1 ) {
 			    	 		unmappedAttribs.add(tag_name);
 			    	 		this.advertFault=true;
-			    	 		System.out.println("<<< The element: ("+tag_name+") from file:("+filename+") is not mapped. >>>");
+			    	 		//System.out.println("<<< The element: ("+tag_name+") from file:("+filename+") is not mapped. >>>");
 			    	 		masterLog.writeMasterLog("<<< The element: ("+tag_name+") from file:("+filename+") is not mapped. >>>");
 			    	 		this.failedTags++;
 			    	 	}
@@ -554,8 +602,9 @@ public class Marketplace {
         User user = new User(); 
         user = user.getUserByName(crm_id, site_name);
         
-        if(this.checkDeleted)
+       /* if(this.checkDeleted)
         	writeAdvertsDB(attributes,adverts,attribMetaArray,user);
+        */
         
         //======================Display a list of the unmapped attributes========================
         String regex 	   = "([A-Z][a-z]+)";
@@ -571,19 +620,19 @@ public class Marketplace {
         			attrib = attrib.substring(0, attrib.length() - 1);
         		
         		attrib = attrib.toLowerCase();        	        
-        		System.out.println("\""+unmappedAttribs.get(i)+"\":\""+attrib+"\",");
+        		//System.out.println("\""+unmappedAttribs.get(i)+"\":\""+attrib+"\",");
         	}        	
         	unmappedAttribs.clear();
         	System.out.println();
         }        	
         if(categoryList.size()>0){
-        	System.out.println("\n === Insert the following attributes in the category list of the CRM of your mapper.json. \n");
+        	/*System.out.println("\n === Insert the following attributes in the category list of the CRM of your mapper.json. \n");
         	for(int i=0;i<categoryList.size();i++) {
         		System.out.println("\""+categoryList.get(i)+"_cat\":"+"\"\",");
         		System.out.println("\""+categoryList.get(i)+"_sub\":"+"\"\",");
         	}        		
         	categoryList.clear();
-        	System.out.println();
+        	System.out.println();*/
         }
         //======================Display a list of the unmapped attributes========================
         
@@ -596,7 +645,8 @@ public class Marketplace {
         //Try to run this one in background       
         if(insert_age || id_found_age || insert || id_found){	
         	System.out.println(" The number of adverts to insert is: ("+adverts.size()+") from the file: "+filename+". Agency Id: "+site_id+"\n");
-        
+        	log.writeLog("The number of adverts to insert is: ("+adverts.size()+") from the file: "+filename+". Agency Id: "+site_id+"\n");     
+        	
         	writeAdvertsDB(attributes,adverts,attribMetaArray,user);
          
         	System.out.println("=== Parsing finished for file: "+filename+", mapper: "+mapper+" ===");		    
@@ -657,8 +707,7 @@ public class Marketplace {
 				System.out.print(" Inserting "+(i+1)+" out of:"+adverts.size()+" adverts.....");				
 				String adv_ext = null;			
 				adv_ext = storedAdverts.get(adverts.get(i)); 				
-		    	long adv_ext_id = Long.valueOf(adverts.get(i));		
-		    	//System.out.println("User id "+adv_ext_id);
+		    	long adv_ext_id = Long.valueOf(adverts.get(i));
 		    	queryaux+="('"+user.getId_ext()+adv_ext_id+"'),";
 		    	
 		    	//If the advert is not present in the database, insert it.
@@ -750,6 +799,9 @@ public class Marketplace {
 		query   = "insert into parser_attributes_meta(attrib_id,advert_int_id, attrib_value) values";
 		counter = 0;							
 		
+		
+		//TODO: Try to run this loop in a new thread. So we can upload the images of different adverts at the same time.
+		System.out.println("===== Uploading images =====");
 		int num_rows = 0;		
 		for(int i=0;i<attribMetaArray.size();i++){
 			String key = attribMetaArray.get(i).getAttribId()+"__"+attribMetaArray.get(i).getAdvertId();							
@@ -792,7 +844,7 @@ public class Marketplace {
 						String advert_id = parts[1];							
 						String attribValue = attribMetaArray.get(i).getAttribValue();
 						
-						if(!attribValue.contains("\'"))
+						if(!attribValue.contains("\\'"))
 							attribValue = attribValue.replaceAll("'", "''");
 						
 						String update = "update parser_attributes_meta set attrib_value = '"+attribValue+"' where attrib_id = '"+attrib_id+"' and advert_int_id ='"+advert_id+"'";															
@@ -823,7 +875,7 @@ public class Marketplace {
 		
 			PropertyImage p = new PropertyImage();		
 			hashAdvert      = adv.getAdvertTitle(user_id);
-
+			
 			for(int i=0;i<web_site_adverts.size();i++){	
 				String[] tokens  = web_site_adverts.get(i).split("___");				
 				try{	
@@ -930,7 +982,6 @@ public class Marketplace {
 		    	}
 		    }					    
 		}
-		
 		//Clear the table before storing the new IDs
 		db.executeUpdate("delete from parser_DeletedAdverts"); 
 		
@@ -942,9 +993,34 @@ public class Marketplace {
 		}				
 		return true;		 
 	}	
+	
+	private boolean isAgencyIntegrated(String filename){		
+		if(filename.equals("ghestia") || filename.equals("1001portales")){
+		    return true;
+		}
+		return false;
+	}
+	
+	/*
+	   final VTDNav vn    = vg.getNav();
+	    final AutoPilot ap = new AutoPilot(vn);
+    	String query = "Insert into parser_DeletedAdverts values";
+	    int count_regs=0;
+    	
+	    //Iterate over all tags from the XML
+	    ap.selectElement("*");
+		while(ap.iterate()){
+			tag_name = vn.toString(vn.getCurrentIndex());
+		    int t    = vn.getText();	
+		    if(t!=-1) {
+		    	tag_value = vn.toNormalizedString(t);			    			  		    			    			    
+		    	if(tag_name.contains("agency_id")){
+		    		return true;
+		    	}
+		    }					    
+		}*/
 }
 
-/*
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class parseAdvertsBG implements Runnable {	
 	String fileurl,mapper,site_name,site_id;
@@ -987,8 +1063,10 @@ class parseAdvertsBG implements Runnable {
 		}
 	}
 }
-///////////////////////////////////////////////////////////////////////////////////////
 
+
+///////////////////////////////////////////////////////////////////////////////////////
+/*
 //This calss will notify us when the parser is done
 class threadDispatcher  implements Runnable {	
 	

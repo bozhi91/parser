@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ArrayOfAnyType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <anyType xsi:type="xsd:int">inmo_68331_175805</anyType>
-  <anyType xsi:type="xsd:int">inmo_03201_176098</anyType>
-  <anyType xsi:type="xsd:int">inmo_68331_176536</anyType>
-</ArrayOfAnyType>

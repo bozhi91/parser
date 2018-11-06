@@ -1,23 +1,25 @@
 package java_cup.myParser;
 
 public class Constant {
-
-	public static final String user = "root";
-	public static final String dbConfigFile = "./db_connect.json"; 
-	public static final String mapper 		= "./mapper.json";  	
-	public static final String logger 		= "./Log_";
-	public static final String logFolder    = "./logs/";			
-	public static final String imagesFolder	= "./pictures/";  		
-	public static final String watermark	= "./watermark.jpg"; 
 	
-	/*
+	/*public static final String user = "root";
+	public static final String dbConfigFile = "./utils/db_connect.json"; 
+	public static final String mapper 		= "./utils/mapper.json";  	
+	public static final String logger 		= "./utils/Log_";
+	public static final String logFolder    = "./utils/logs/";			
+	public static final String imagesFolder	= "./utils/pictures/";  		
+	public static final String watermark	= "./utils/watermark.jpg"; 
+	public static final String xmlFolder	= "./utils/xmls/";
+	*/
+	
 	public static final String dbConfigFile = "/home/bozhi/Downloads/xmlParser/xmlParser/utils/db_connect.json";
 	public static final String mapper 		= "/home/bozhi/Downloads/xmlParser/xmlParser/utils/mapper.json";
 	public static final String logger 		= "jar_";
 	public static final String logFolder    = "/home/bozhi/Desktop/Logs/";	
 	public static final String imagesFolder	= "/home/bozhi/Desktop/pictures/";
 	public static final String watermark	= "/home/bozhi/Downloads/xmlParser/xmlParser/utils/watermark.jpg";	
-	*/
+	public static final String xmlFolder	= "/home/bozhi/Desktop/xmls/";
+	
 	
 	//===== Image properties =====
 	public static final int image_full_width  = 1200;
@@ -44,7 +46,6 @@ public class Constant {
 	//===== FTP Constants =====
 	//public static final String remote_ftp_file = "/AGENCIAS.xml";
 	
-	public static final String id_prefix = "99";
-	
+	public static final String id_prefix = "";
 	public Constant() {}
 }

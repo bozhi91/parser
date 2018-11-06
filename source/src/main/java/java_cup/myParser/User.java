@@ -72,9 +72,9 @@ public class User {
 			 //Normalize the id of the property. The id only allows integer numbers.
 			 if(CRM.get(tag_name)!=null && CRM.get(tag_name).equals("id")){
 				tag_value = tag_value.replace("inmo_", "");
-				if(tag_value.startsWith(""))
+			/*	if(tag_value.startsWith(""))
 				   tag_value.substring(2, tag_value.length());
-					
+				*/	
 				this.user_ext_id = Integer.valueOf(tag_value);	
 				this.id =Constant.id_prefix+this.crm_id+this.user_ext_id;					
 		    }
@@ -183,18 +183,15 @@ public class User {
 		
 		if(!this.name.equals(user.name)){	
 			update+=" name = '"+this.name+"',";
-			mismatch = true;
-			System.out.println("a"+this.name+" :"+user.name);
+			mismatch = true;			
 		}
 		if(!this.email.equals(user.email)){	
 			update+=" email = '"+this.email+"',";
-			mismatch = true;
-			System.out.println("b");
+			mismatch = true;		
 		}
 		if(!this.phone.equals(user.phone)){	
 			update+=" tel = '"+this.phone+"',";
 			mismatch = true;
-			System.out.println("c");
 		}		
 		
 		if(mismatch){			
